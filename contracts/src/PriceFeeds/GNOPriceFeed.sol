@@ -7,9 +7,14 @@ import "./MainnetPriceFeedBase.sol";
 // import "forge-std/console2.sol";
 
 contract GnoPriceFeed is MainnetPriceFeedBase {
-    constructor(address _gnoUsdOracleAddress, uint256 _gnoUsdStalenessThreshold, address _borrowerOperationsAddress)
+    Oracle public usdEurOracle;
+    constructor(address _gnoUsdOracleAddress, address _usdEurOracleAddress, uint256 _gnoUsdStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress)
         MainnetPriceFeedBase(_gnoUsdOracleAddress, _gnoUsdStalenessThreshold, _borrowerOperationsAddress)
     {
+        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
+        usdEurOracle.stalenessThreshold = _gnoUsdStalenessThreshold;
+        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+
         _fetchPricePrimary();
 
         // Check the oracle didn't already fail
@@ -36,11 +41,16 @@ contract GnoPriceFeed is MainnetPriceFeedBase {
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (ethUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
+        if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
 
-        lastGoodPrice = ethUsdPrice;
-        return (ethUsdPrice, false);
+        // convert usd to eur
+        uint256 gnoEurPrice = ethUsdPrice * usdEurPrice / 1e18;
+        
+        lastGoodPrice = gnoEurPrice;
+        return (gnoEurPrice, false);
     }
 }
