@@ -34,6 +34,7 @@ contract SDAIPriceFeed is MainnetPriceFeedBase {
     // - A bool indicating whether a new oracle failure was detected in the call
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
+        
         (uint256 daiEurPrice, bool daiEurOracleDown) = _getOracleAnswer(ethUsdOracle);
 
         // Get the DAI rate of the SDAI vault

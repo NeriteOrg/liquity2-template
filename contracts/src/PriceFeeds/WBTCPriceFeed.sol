@@ -9,15 +9,15 @@ contract WBTCPriceFeed is CompositePriceFeed {
     Oracle public btcUsdOracle;
     Oracle public wBTCUsdOracle;
 
-    uint256 public constant BTC_wBTC_DEVIATION_THRESHOLD = 2e16; // 2%
+    uint256 public constant BTC_WBTC_DEVIATION_THRESHOLD = 2e16; // 2%
 
     constructor(
-        address _owner, 
         address _wBTCUsdOracleAddress, 
-        address _wBTCUsdOracleAddress,
+        address _btcUsdOracleAddress,
         uint256 _wBTCUsdStalenessThreshold,
-        uint256 _btcUsdStalenessThreshold
-    ) CompositePriceFeed(_owner, _wBTCUsdOracleAddress, _btcUsdOracleAddress, _wBTCUsdStalenessThreshold)
+        uint256 _btcUsdStalenessThreshold,
+        address _borrowerOperationsAddress
+    ) CompositePriceFeed(_wBTCUsdOracleAddress, _btcUsdOracleAddress, _wBTCUsdStalenessThreshold, _borrowerOperationsAddress)
     {
         // Store BTC-USD oracle
         btcUsdOracle.aggregator = AggregatorV3Interface(_btcUsdOracleAddress);
@@ -51,7 +51,7 @@ contract WBTCPriceFeed is CompositePriceFeed {
         }
 
         // Otherwise, use the primary price calculation:
-        if (_isRedemption && _withinDeviationThreshold(wBTCUsdPrice, btcUsdPrice, BTC_wBTC_DEVIATION_THRESHOLD)) {
+        if (_isRedemption && _withinDeviationThreshold(wBTCUsdPrice, btcUsdPrice, BTC_WBTC_DEVIATION_THRESHOLD)) {
             // If it's a redemption and within 2%, take the max of (wBTC-USD, BTC-USD) to prevent value leakage and convert to wBTC-USD
             wBTCUsdPrice = LiquityMath._max(wBTCUsdPrice, btcUsdPrice);
         }else{
