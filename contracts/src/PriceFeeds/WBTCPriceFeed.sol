@@ -8,17 +8,25 @@ import "./CompositePriceFeed.sol";
 contract WBTCPriceFeed is CompositePriceFeed {
     Oracle public btcUsdOracle;
     Oracle public wBTCUsdOracle;
+    Oracle public usdEurOracle;
 
     uint256 public constant BTC_WBTC_DEVIATION_THRESHOLD = 2e16; // 2%
 
     constructor(
         address _wBTCUsdOracleAddress, 
         address _btcUsdOracleAddress,
+        address _usdEurOracleAddress,
         uint256 _wBTCUsdStalenessThreshold,
         uint256 _btcUsdStalenessThreshold,
+        uint256 _usdEurStalenessThreshold,
         address _borrowerOperationsAddress
     ) CompositePriceFeed(_wBTCUsdOracleAddress, _btcUsdOracleAddress, _wBTCUsdStalenessThreshold, _borrowerOperationsAddress)
     {
+        // Store EUR-USD oracle
+        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
+        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+
         // Store BTC-USD oracle
         btcUsdOracle.aggregator = AggregatorV3Interface(_btcUsdOracleAddress);
         btcUsdOracle.stalenessThreshold = _btcUsdStalenessThreshold;
@@ -31,8 +39,9 @@ contract WBTCPriceFeed is CompositePriceFeed {
 
         _fetchPricePrimary(false);
 
-        // Check the oracle didn't already fail
+        // Check the oracles didn't already fail
         assert(priceSource == PriceSource.primary);
+        assert(usdEurOracle.decimals == 8);
     }
 
     function _fetchPricePrimary(bool _isRedemption) internal override returns (uint256, bool) {
@@ -58,10 +67,11 @@ contract WBTCPriceFeed is CompositePriceFeed {
             // Take the minimum of (market, canonical) in order to mitigate against upward market price manipulation.
             wBTCUsdPrice = LiquityMath._min(wBTCUsdPrice, btcUsdPrice);
         }
-
-        // Otherwise, just use wBTC-USD price: USD_per_wBTC.
-        lastGoodPrice = wBTCUsdPrice;
-        return (wBTCUsdPrice, false);
+        
+        uint256 wBTCEurPrice = wBTCUsdPrice * usdEurPrice / 1e18;
+        // Otherwise, just use wBTC-USD price: USD_per_wBTC * EUR_per_USD.
+        lastGoodPrice = wBTCEurPrice;
+        return (wBTCEurPrice, false);
     }
 
     function _getCanonicalRate() internal view override returns (uint256, bool) {

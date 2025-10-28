@@ -5,7 +5,7 @@ pragma solidity 0.8.24;
 import "./MainnetPriceFeedBase.sol";
 
 // import "forge-std/console2.sol";
-// OSGNO price feed 0x9B1b13afA6a57e54C03AD0428a4766C39707D272
+// TODO: OSGNO/GNO (possibly ETH?  we'll have to figure that out) price feed 0x9B1b13afA6a57e54C03AD0428a4766C39707D272
 contract OSGNOPriceFeed is MainnetPriceFeedBase {
     Oracle public gnoEurOracle;
     constructor(address _osgnoGnoOracleAddress, address _gnoEurOracleAddress, uint256 _osgnoGnoStalenessThreshold, uint256 _osgnoEurStalenessThreshold, address _borrowerOperationsAddress)
