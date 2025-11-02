@@ -40,6 +40,7 @@ contract OSGNOPriceFeed is MainnetPriceFeedBase {
     // - A bool indicating whether a new oracle failure was detected in the call
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
+        // ethUsd is the osGno/Gno oracle
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
         (uint256 gnoEurPrice, bool gnoEurOracleDown) = _getOracleAnswer(gnoEurOracle);
 
