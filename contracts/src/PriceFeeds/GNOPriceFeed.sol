@@ -12,7 +12,7 @@ contract GNOPriceFeed is MainnetPriceFeedBase {
         MainnetPriceFeedBase(_gnoUsdOracleAddress, _gnoUsdStalenessThreshold, _borrowerOperationsAddress)
     {
         usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
-        usdEurOracle.stalenessThreshold = _gnoUsdStalenessThreshold;
+        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
         usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
 
         _fetchPricePrimary();

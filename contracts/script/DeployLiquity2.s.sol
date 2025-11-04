@@ -77,6 +77,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // tapping disallowed
     IWETH WETH;
     IERC20Metadata USDC;
+    // TODO: UPDATE ALL ADDRESSES FOR GNOSIS denominated in EUR
     address WSTETH_ADDRESS = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
     address RETH_ADDRESS = 0xae78736Cd615f374D3085123A210448E74Fc6393;
     address ETH_ORACLE_ADDRESS = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
@@ -94,6 +95,26 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address internal lqty;
     address internal stakingV1;
     address internal lusd;
+
+    // GNOSIS
+
+    IWETH GNO_WETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_WSTETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_RETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address SDAI_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address WBTC_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address OSGNO_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_GNO_USD_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_GNO_EUR_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_USD_EUR_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_ETH_EUR_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address GNO_DAI_EUR_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 24 hours;
+    uint256 GNO_GNO_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 GNO_USD_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 GNO_ETH_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 GNO_DAI_EUR_STALENESS_THRESHOLD = 24 hours;
 
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
@@ -251,7 +272,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         uint256 epochStart = vm.envOr(
             "EPOCH_START",
-            (block.chainid == 1 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
+            (block.chainid == 100 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
         );
 
         useTestnetPriceFeeds = vm.envOr("USE_TESTNET_PRICEFEEDS", false);
@@ -286,7 +307,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             return;
         }
 
-        if (block.chainid == 1) {
+        if (block.chainid == 100) {
             // mainnet
             WETH = IWETH(WETH_ADDRESS);
             USDC = IERC20Metadata(USDC_ADDRESS);
@@ -349,8 +370,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // rETH (same as wstETH)
         troveManagerParamsArray[2] = troveManagerParamsArray[1];
 
-        string[] memory collNames = new string[](2);
-        string[] memory collSymbols = new string[](2);
+        string[] memory collNames = new string[](6);
+        string[] memory collSymbols = new string[](6);
         collNames[0] = "Wrapped liquid staked Ether 2.0";
         collSymbols[0] = "wstETH";
         collNames[1] = "Rocket Pool ETH";
@@ -365,6 +386,21 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             lusd: lusd,
             bold: boldAddress
         });
+
+        // GNO
+        collNames[3] = "Gnosis";
+        collSymbols[3] = "GNO";
+
+        //SDAI
+        collNames[4] = "Synthetix sDAI";
+        collSymbols[4] = "sDAI";
+        //WBTC
+        collNames[5] = "Wrapped Bitcoin";
+        collSymbols[5] = "WBTC";
+        //OSGNO
+        collNames[6] = "Osmosis GNO";
+        collSymbols[6] = "OSGNO";
+
 
         DeploymentResult memory deployed =
             _deployAndConnectContracts(troveManagerParamsArray, collNames, collSymbols, deployGovernanceParams);
@@ -419,7 +455,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         }
 
         ICurveStableswapNGPool lusdCurvePool;
-        if (block.chainid == 1) {
+        if (block.chainid == 100) {
             lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
         }
 
@@ -574,7 +610,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         vars.troveManagers = new ITroveManager[](vars.numCollaterals);
 
         // Collaterals
-        if (block.chainid == 1 && !useTestnetPriceFeeds) {
+        if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
             // ETH
             vars.collaterals[0] = IERC20Metadata(WETH);
@@ -584,6 +620,18 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // RETH
             vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
+
+            // GNO
+            vars.collaterals[3] = IERC20Metadata(GNO_ADDRESS);
+
+            // sDAI
+            vars.collaterals[4] = IERC20Metadata(SDAI_ADDRESS);
+
+            // WBTC
+            vars.collaterals[5] = IERC20Metadata(WBTC_ADDRESS);
+
+            // OSGNO
+            vars.collaterals[6] = IERC20Metadata(OSGNO_ADDRESS);
         } else {
             // Sepolia
             // Use WETH as collateral for the first branch
@@ -776,7 +824,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         internal
         returns (IPriceFeed)
     {
-        if (block.chainid == 1 && !useTestnetPriceFeeds) {
+        if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
             // ETH
             if (_collTokenAddress == address(WETH)) {
@@ -793,7 +841,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 );
             }
             // RETH
-            assert(_collTokenAddress == RETH_ADDRESS);
+            if(_collTokenAddress == RETH_ADDRESS){
             return new RETHPriceFeed(
                 ETH_ORACLE_ADDRESS,
                 RETH_ORACLE_ADDRESS,
@@ -802,6 +850,43 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 RETH_ETH_STALENESS_THRESHOLD,
                 _borroweOperationsAddress
             );
+            }
+            if(_collTokenAddress == GNO_ADDRESS){
+                return new GNOPriceFeed(
+                    GNO_GNO_USD_ORACLE_ADDRESS,
+                    GNO_GNO_EUR_ORACLE_ADDRESS,
+                    GNO_GNO_USD_STALENESS_THRESHOLD,
+                    GNO_GNO_EUR_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
+            if(_collTokenAddress == SDAI_ADDRESS){
+                return new SDAIPriceFeed(
+                    SDAI_USD_ORACLE_ADDRESS,
+                    SDAI_EUR_ORACLE_ADDRESS,
+                    SDAI_USD_STALENESS_THRESHOLD,
+                    SDAI_EUR_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
+            if(_collTokenAddress == WBTC_ADDRESS){
+                return new WBTCPriceFeed(
+                    WBTC_USD_ORACLE_ADDRESS,
+                    WBTC_EUR_ORACLE_ADDRESS,
+                    WBTC_USD_STALENESS_THRESHOLD,
+                    WBTC_EUR_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
+            if(_collTokenAddress == OSGNO_ADDRESS){
+                return new OSGNOPriceFeed(
+                    OSGNO_GNO_USD_ORACLE_ADDRESS,
+                    OSGNO_GNO_EUR_ORACLE_ADDRESS,
+                    OSGNO_GNO_USD_STALENESS_THRESHOLD,
+                    OSGNO_GNO_EUR_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
         }
 
         // Sepolia
