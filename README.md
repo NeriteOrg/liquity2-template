@@ -1,3 +1,12 @@
+# Firm Finance
+
+## Overview & updates
+- ETH aligned with new LST collaterals
+- Support for Status gas-less L2
+- Revamped reward system that benefits real users
+- Direction of a customizable portion of protocol revenues to Status community treasury
+- Gas comp points for protocol users
+
 <img width="830" alt="Liquity V2" src="https://github.com/user-attachments/assets/d9eb5b2a-d437-4472-94d6-07fa537e689a" />
 
 [![Coverage Status](https://coveralls.io/repos/github/liquity/bold/badge.svg?branch=main&t=yZSfc8)](https://coveralls.io/github/liquity/bold?branch=main)
