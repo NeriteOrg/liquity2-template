@@ -271,6 +271,7 @@ export enum TroveStatusEnum {
 }
 
 // Re-export for compatibility
+// @ts-ignore
 export { TroveStatusEnum as TroveStatus }
 
 export interface Trove {
