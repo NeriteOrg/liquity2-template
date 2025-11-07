@@ -1,4 +1,5 @@
 import type { CodegenConfig } from "@graphql-codegen/cli";
+import 'dotenv/config';
 
 function findSubgraphUrl(envFile: string) {
   const fs = require("fs");
@@ -24,7 +25,7 @@ function findSubgraphUrl(envFile: string) {
   return null;
 }
 
-const subgraphUrl = findSubgraphUrl(".env.local") ?? findSubgraphUrl(".env");
+const subgraphUrl = findSubgraphUrl(".env.local") ?? findSubgraphUrl(".env") ?? process.env.NEXT_PUBLIC_SUBGRAPH_URL;
 
 if (!subgraphUrl) {
   throw new Error(
