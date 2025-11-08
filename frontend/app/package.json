@@ -6,6 +6,7 @@
   "version": "1.7.0",
   "type": "module",
   "scripts": {
+    "start": "next start",
     "build": "pnpm build-deps && pnpm clean && next build",
     "build-analyze": "ANALYZE=true pnpm build",
     "build-banner": "test -f ./Banner.tsx || cp ./Banner.example.tsx ./Banner.tsx",
@@ -33,6 +34,7 @@
     "blo": "^2.0.0",
     "connectkit": "^1.9.1",
     "dnum": "^2.15.0",
+    "dotenv": "^17.2.3",
     "focus-trap-react": "^11.0.4",
     "geist": "^1.4.2",
     "next": "15.3.4",
