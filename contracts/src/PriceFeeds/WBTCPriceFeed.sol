@@ -48,7 +48,12 @@ contract WBTCPriceFeed is CompositePriceFeed {
         assert(priceSource == PriceSource.primary);
         (uint256 wBTCUsdPrice, bool wBTCUsdOracleDown) = _getOracleAnswer(wBTCUsdOracle);
         (uint256 btcUsdPrice, bool btcOracleDown) = _getOracleAnswer(btcUsdOracle);
-        
+
+        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
+        if (usdEurOracleDown) {
+            return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
+        }
+
         // wBTC oracle is down or invalid answer
         if (wBTCUsdOracleDown) {
             return (_shutDownAndSwitchToLastGoodPrice(address(wBTCUsdOracle.aggregator)), true);

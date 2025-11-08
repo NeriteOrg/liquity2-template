@@ -55,6 +55,11 @@ import {MockStakingV1} from "V2-gov/test/mocks/MockStakingV1.sol";
 
 import {DeployGovernance} from "./DeployGovernance.s.sol";
 
+import {GNOPriceFeed} from "src/PriceFeeds/GNOPriceFeed.sol";
+import {OSGNOPriceFeed} from "src/PriceFeeds/OSGNOPriceFeed.sol";
+import {SDAIPriceFeed} from "src/PriceFeeds/SDAIPriceFeed.sol";
+import {WBTCPriceFeed} from "src/PriceFeeds/WBTCPriceFeed.sol";
+
 function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) {
     return block.timestamp / 1 weeks * 1 weeks;
 }
@@ -97,11 +102,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address internal lusd;
 
     // GNOSIS
-
+    // TODO: UPDATE FROM DUMMY ADDRESSES
     IWETH GNO_WETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address GNO_WSTETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address GNO_RETH_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address SDAI_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
+    address DAI_USD_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address WBTC_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address OSGNO_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
     address GNO_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
@@ -115,6 +121,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_USD_EUR_STALENESS_THRESHOLD = 24 hours;
     uint256 GNO_ETH_EUR_STALENESS_THRESHOLD = 24 hours;
     uint256 GNO_DAI_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 SDAI_USD_STALENESS_THRESHOLD = 24 hours;
+    uint256 SDAI_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 WBTC_USD_STALENESS_THRESHOLD = 24 hours;
+    uint256 WBTC_EUR_STALENESS_THRESHOLD = 24 hours;
+    uint256 OSGNO_GNO_USD_STALENESS_THRESHOLD = 24 hours;
+    uint256 OSGNO_GNO_EUR_STALENESS_THRESHOLD = 24 hours;
 
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
