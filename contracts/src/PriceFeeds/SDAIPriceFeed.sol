@@ -8,10 +8,15 @@ import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 
 contract SDAIPriceFeed is MainnetPriceFeedBase {
     IERC4626 public immutable sdai;
+    Oracle public usdEurOracle;
 
-    constructor(address _sdaiUsdOracleAddress, uint256 _sdaiUsdStalenessThreshold, address _borrowerOperationsAddress, address _sdaiAddress)
-        MainnetPriceFeedBase(_sdaiUsdOracleAddress, _sdaiUsdStalenessThreshold, _borrowerOperationsAddress)
+    constructor(address _daiUsdOracleAddress, address _usdEurOracleAddress, uint256 _daiUsdStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress, address _sdaiAddress)
+        MainnetPriceFeedBase(_daiUsdOracleAddress, _daiUsdStalenessThreshold, _borrowerOperationsAddress)
     {
+        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
+        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+
         sdai = IERC4626(_sdaiAddress);
     }
 
@@ -35,18 +40,20 @@ contract SDAIPriceFeed is MainnetPriceFeedBase {
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         
-        (uint256 daiEurPrice, bool daiEurOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 daiUSDPrice, bool daiEurOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
 
         // Get the DAI rate of the SDAI vault
         uint256 sdaiDaiRate = sdai.convertToAssets(1e18);
 
         // If the DAI-EUR Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (daiEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
-        if (sdaiDaiRate == 0) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
+        if (sdaiDaiRate == 0) return (_shutDownAndSwitchToLastGoodPrice(address(sdai)), true);
+        if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
         
-        uint256 sdaiEurPrice = daiEurPrice * sdaiDaiRate / 1e18;
-        lastGoodPrice = sdaiEurPrice;
+        uint256 sdaiUSDPrice = daiUSDPrice * sdaiDaiRate / 1e18;
+        lastGoodPrice = sdaiUSDPrice * usdEurPrice / 1e18;
 
-        return (sdaiEurPrice, false);
+        return (lastGoodPrice, false);
     }
 }

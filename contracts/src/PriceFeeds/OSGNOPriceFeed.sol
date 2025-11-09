@@ -7,13 +7,19 @@ import "./MainnetPriceFeedBase.sol";
 // import "forge-std/console2.sol";
 // TODO: OSGNO/GNO (possibly ETH?  we'll have to figure that out) price feed 0x9B1b13afA6a57e54C03AD0428a4766C39707D272
 contract OSGNOPriceFeed is MainnetPriceFeedBase {
-    Oracle public gnoEurOracle;
-    constructor(address _osgnoGnoOracleAddress, address _gnoEurOracleAddress, uint256 _osgnoGnoStalenessThreshold, uint256 _osgnoEurStalenessThreshold, address _borrowerOperationsAddress)
+    Oracle public gnoUsdOracle;
+    Oracle public usdEurOracle;
+    
+    constructor(address _osgnoGnoOracleAddress, address _gnoUSDOracleAddress, address _usdEurOracleAddress, uint256 _osgnoGnoStalenessThreshold, uint256 _gnoUSDStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress)
         MainnetPriceFeedBase(_osgnoGnoOracleAddress, _osgnoGnoStalenessThreshold, _borrowerOperationsAddress)
     {
-        gnoEurOracle.aggregator = AggregatorV3Interface(_gnoEurOracleAddress);
-        gnoEurOracle.stalenessThreshold = _osgnoEurStalenessThreshold;
-        gnoEurOracle.decimals = gnoEurOracle.aggregator.decimals();
+        gnoUsdOracle.aggregator = AggregatorV3Interface(_gnoUSDOracleAddress);
+        gnoUsdOracle.stalenessThreshold = _gnoUSDStalenessThreshold;
+        gnoUsdOracle.decimals = gnoUsdOracle.aggregator.decimals();
+
+        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
+        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
 
         _fetchPricePrimary();
 
@@ -41,15 +47,18 @@ contract OSGNOPriceFeed is MainnetPriceFeedBase {
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         // ethUsd is the osGno/Gno oracle
-        (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
-        (uint256 gnoEurPrice, bool gnoEurOracleDown) = _getOracleAnswer(gnoEurOracle);
+        (uint256 osGnoGnoPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 gnoUSDPrice, bool gnoEurOracleDown) = _getOracleAnswer(gnoUsdOracle);
+        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (ethUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
-        if (gnoEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(gnoEurOracle.aggregator)), true);
+        if (gnoEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(gnoUsdOracle.aggregator)), true);
+        if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
 
         // convert usd to eur
-        uint256 osgnoEurPrice = ethUsdPrice * gnoEurPrice / 1e18;
+        uint256 osgnoUsdPrice = osGnoGnoPrice * gnoUSDPrice / 1e18;
+        uint256 osgnoEurPrice = osgnoUsdPrice * usdEurPrice / 1e18;
         
         lastGoodPrice = osgnoEurPrice;
         return (osgnoEurPrice, false);
