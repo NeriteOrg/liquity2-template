@@ -46,6 +46,7 @@ export default defineConfig({
       fontWeight: 500,
       color: "content",
       background: "background",
+      fontFamily: "var(--font-oswald, Oswald), sans-serif",
     },
     html: {
       overflowX: "auto",
