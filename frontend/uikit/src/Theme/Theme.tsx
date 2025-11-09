@@ -110,6 +110,7 @@ export const colors = {
 	"evro:greenWhite": "#f6f9f4", // Light green background
 	"evro:greenWhiteAlt": "#ECF2E8BF", // Alternative green-white
 	"evro:background": "#A082F5", // Light purple background (HSBA: 256, 47%, 96%, 1)
+	"evro:pageBackground": "#F7FAF5", // Page background (HSBA: 96, 2%, 98%, 1)
 	"evro:footer": "#757BA3", // Purple-gray footer
 
 	// Brand colors
@@ -131,7 +132,7 @@ export const lightTheme = {
 		accentActive: "blue:600",
 		accentContent: "white",
 		accentHint: "blue:400",
-		background: "white",
+		background: "evro:pageBackground",
 		backgroundActive: "gray:50",
 		border: "gray:200",
 		borderSoft: "gray:100",
