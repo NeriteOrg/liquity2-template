@@ -134,6 +134,9 @@ importers:
       dnum:
         specifier: ^2.15.0
         version: 2.15.0
+      dotenv:
+        specifier: ^17.2.3
+        version: 17.2.3
       focus-trap-react:
         specifier: ^11.0.4
         version: 11.0.4(@types/react-dom@19.1.6)(@types/react@19.1.8)(react-dom@19.1.0)(react@19.1.0)
@@ -1228,7 +1231,7 @@ packages:
     dependencies:
       bech32: 1.1.4
       blakejs: 1.2.1
-      bn.js: 4.12.0
+      bn.js: 4.12.2
       bs58: 4.0.1
       crypto-addr-codec: 0.1.8
       nano-base32: 1.0.1
@@ -10469,6 +10472,11 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
+  /dotenv@17.2.3:
+    resolution: {integrity: sha512-JVUnt+DUIzu87TABbhPmNfVdBDt18BLOWjMUFJMSi/Qqg7NTYtabbvSNJGOJ7afbRuv9D/lngizHtP7QyLQ+9w==}
+    engines: {node: '>=12'}
+    dev: false
+
   /dprint@0.50.0:
     resolution: {integrity: sha512-aNJhOQsUS5D9k/YkMUaLLniIpxEBUR0ZwT0RXGQV5YpaGwE2nx6FcKuVkC6wRaZXTr8X0NpV/2HFbcvNuI2jtA==}
     hasBin: true
@@ -10578,7 +10586,7 @@ packages:
   /elliptic@6.5.4:
     resolution: {integrity: sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==}
     dependencies:
-      bn.js: 4.12.0
+      bn.js: 4.12.2
       brorand: 1.1.0
       hash.js: 1.1.7
       hmac-drbg: 1.0.1
@@ -14708,7 +14716,7 @@ packages:
     resolution: {integrity: sha512-fgAN3jGAh+RoxUGZHTSOLJIqUc2wmoBwGR4tbpNAKmmovFoWq0OdRkb0VkldReO2a2iBT/OEulG9XSUc10r3zg==}
     dependencies:
       lower-case: 2.0.2
-      tslib: 2.8.0
+      tslib: 2.8.1
     dev: true
 
   /node-addon-api@2.0.2:
@@ -14754,11 +14762,6 @@ packages:
       data-uri-to-buffer: 4.0.1
       fetch-blob: 3.2.0
       formdata-polyfill: 4.0.10
-    dev: true
-
-  /node-gyp-build@4.8.1:
-    resolution: {integrity: sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==}
-    hasBin: true
     dev: true
 
   /node-gyp-build@4.8.4:
@@ -16655,7 +16658,7 @@ packages:
     dependencies:
       elliptic: 6.5.6
       node-addon-api: 2.0.2
-      node-gyp-build: 4.8.1
+      node-gyp-build: 4.8.4
     dev: true
 
   /secure-json-parse@2.7.0:
