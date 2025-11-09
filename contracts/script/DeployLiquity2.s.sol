@@ -73,7 +73,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     string constant DEPLOYMENT_MODE_BOLD_ONLY = "bold-only";
     string constant DEPLOYMENT_MODE_USE_EXISTING_BOLD = "use-existing-bold";
 
-    uint256 constant NUM_BRANCHES = 3;
+    uint256 constant NUM_BRANCHES = 5;
 
     address WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
@@ -373,35 +373,26 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         TroveManagerParams[] memory troveManagerParamsArray = new TroveManagerParams[](NUM_BRANCHES);
 
-        // WETH
-        troveManagerParamsArray[0] = TroveManagerParams({
-            CCR: CCR_WETH,
-            MCR: MCR_WETH,
-            SCR: SCR_WETH,
-            BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WETH,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WETH
-        });
 
-        // wstETH
-        troveManagerParamsArray[1] = TroveManagerParams({
-            CCR: CCR_SETH,
-            MCR: MCR_SETH,
-            SCR: SCR_SETH,
-            BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
-        });
+        // // wstETH
+        // troveManagerParamsArray[1] = TroveManagerParams({
+        //     CCR: CCR_SETH,
+        //     MCR: MCR_SETH,
+        //     SCR: SCR_SETH,
+        //     BCR: BCR_ALL,
+        //     LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
+        //     LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
+        // });
 
-        // rETH (same as wstETH)
-        troveManagerParamsArray[2] = troveManagerParamsArray[1];
+        // // rETH (same as wstETH)
+        // troveManagerParamsArray[2] = troveManagerParamsArray[1];
 
-        string[] memory collNames = new string[](6);
-        string[] memory collSymbols = new string[](6);
-        collNames[0] = "Wrapped liquid staked Ether 2.0";
-        collSymbols[0] = "wstETH";
-        collNames[1] = "Rocket Pool ETH";
-        collSymbols[1] = "rETH";
+        string[] memory collNames = new string[](NUM_BRANCHES);
+        string[] memory collSymbols = new string[](NUM_BRANCHES);
+        // collNames[0] = "Wrapped liquid staked Ether 2.0";
+        // collSymbols[0] = "wstETH";
+        // collNames[1] = "Rocket Pool ETH";
+        // collSymbols[1] = "rETH";
 
         DeployGovernanceParams memory deployGovernanceParams = DeployGovernanceParams({
             epochStart: epochStart,
@@ -413,19 +404,95 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             bold: boldAddress
         });
 
+        // WETH
+        uint256 CCR_WETH = 150 * _1pct;
+        uint256 MCR_WETH = 110 * _1pct;
+        uint256 SCR_WETH = 110 * _1pct;
+        uint256 LIQUIDATION_PENALTY_SP_WETH = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
+
+        collNames[0] = "Wrapped Ether";
+        collSymbols[0] = "WETH";
+        troveManagerParamsArray[0] = TroveManagerParams({
+            CCR: CCR_WETH,
+            MCR: MCR_WETH,
+            SCR: SCR_WETH,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WETH,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WETH
+        });
+
         // GNO
-        collNames[3] = "Gnosis";
-        collSymbols[3] = "GNO";
+        uint256 CCR_GNO = 150 * _1pct;
+        uint256 MCR_GNO = 110 * _1pct;
+        uint256 SCR_GNO = 110 * _1pct;
+        uint256 LIQUIDATION_PENALTY_SP_GNO = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_GNO = 10 * _1pct;
+
+        troveManagerParamsArray[1] = TroveManagerParams({
+            CCR: CCR_GNO,
+            MCR: MCR_GNO,
+            SCR: SCR_GNO,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_GNO,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_GNO
+        });
+        collNames[1] = "Gnosis";
+        collSymbols[1] = "GNO";
 
         //SDAI
-        collNames[4] = "Synthetix sDAI";
-        collSymbols[4] = "sDAI";
+        uint256 CCR_SDAI = 150 * _1pct;
+        uint256 MCR_SDAI = 110 * _1pct;
+        uint256 SCR_SDAI = 110 * _1pct;
+        uint256 LIQUIDATION_PENALTY_SP_SDAI = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_SDAI = 10 * _1pct;
+
+        troveManagerParamsArray[2] = TroveManagerParams({
+            CCR: CCR_SDAI,
+            MCR: MCR_SDAI,
+            SCR: SCR_SDAI,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SDAI,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SDAI
+        });
+        collNames[2] = "Synthetix sDAI";
+        collSymbols[2] = "sDAI";
+
         //WBTC
-        collNames[5] = "Wrapped Bitcoin";
-        collSymbols[5] = "WBTC";
+        uint256 CCR_WBTC = 150 * _1pct;
+        uint256 MCR_WBTC = 110 * _1pct;
+        uint256 SCR_WBTC = 110 * _1pct;
+        uint256 LIQUIDATION_PENALTY_SP_WBTC = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WBTC = 10 * _1pct;
+
+        troveManagerParamsArray[3] = TroveManagerParams({
+            CCR: CCR_WBTC,
+            MCR: MCR_WBTC,
+            SCR: SCR_WBTC,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WBTC,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WBTC
+        });
+        collNames[3] = "Wrapped Bitcoin";
+        collSymbols[3] = "WBTC";
+
         //OSGNO
-        collNames[6] = "Osmosis GNO";
-        collSymbols[6] = "OSGNO";
+        uint256 CCR_OSGNO = 150 * _1pct;
+        uint256 MCR_OSGNO = 110 * _1pct;
+        uint256 SCR_OSGNO = 110 * _1pct;
+        uint256 LIQUIDATION_PENALTY_SP_OSGNO = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_OSGNO = 10 * _1pct;
+
+        troveManagerParamsArray[4] = TroveManagerParams({
+            CCR: CCR_OSGNO,
+            MCR: MCR_OSGNO,
+            SCR: SCR_OSGNO,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_OSGNO,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_OSGNO
+        });
+        collNames[4] = "Osmosis GNO";
+        collSymbols[4] = "OSGNO";
 
 
         DeploymentResult memory deployed =
