@@ -3,6 +3,7 @@
 pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 // import "forge-std/console2.sol";
 // TODO: OSGNO/GNO (possibly ETH?  we'll have to figure that out) price feed 0x9B1b13afA6a57e54C03AD0428a4766C39707D272
@@ -57,8 +58,8 @@ contract OSGNOPriceFeed is MainnetPriceFeedBase {
         if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
 
         // convert usd to eur
-        uint256 osgnoUsdPrice = osGnoGnoPrice * gnoUSDPrice / 1e18;
-        uint256 osgnoEurPrice = osgnoUsdPrice * usdEurPrice / 1e18;
+        uint256 osgnoUsdPrice = FixedPointMathLib.mulWadUp(osGnoGnoPrice, gnoUSDPrice);
+        uint256 osgnoEurPrice = FixedPointMathLib.mulWad(osgnoUsdPrice, usdEurPrice);
         
         lastGoodPrice = osgnoEurPrice;
         return (osgnoEurPrice, false);

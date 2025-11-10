@@ -3,6 +3,7 @@
 pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 // import "forge-std/console2.sol";
 
@@ -48,7 +49,7 @@ contract GNOPriceFeed is MainnetPriceFeedBase {
         if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
 
         // convert usd to eur
-        uint256 gnoEurPrice = ethUsdPrice * usdEurPrice / 1e18;
+        uint256 gnoEurPrice = FixedPointMathLib.mulWad(ethUsdPrice, usdEurPrice);
         
         lastGoodPrice = gnoEurPrice;
         return (gnoEurPrice, false);

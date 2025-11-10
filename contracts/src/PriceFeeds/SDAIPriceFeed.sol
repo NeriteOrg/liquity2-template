@@ -4,6 +4,7 @@ pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 // import "forge-std/console2.sol";
 
 contract SDAIPriceFeed is MainnetPriceFeedBase {
@@ -51,8 +52,8 @@ contract SDAIPriceFeed is MainnetPriceFeedBase {
         if (sdaiDaiRate == 0) return (_shutDownAndSwitchToLastGoodPrice(address(sdai)), true);
         if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
         
-        uint256 sdaiUSDPrice = daiUSDPrice * sdaiDaiRate / 1e18;
-        lastGoodPrice = sdaiUSDPrice * usdEurPrice / 1e18;
+        uint256 sdaiUSDPrice = FixedPointMathLib.mulWadUp(daiUSDPrice, sdaiDaiRate);
+        lastGoodPrice = FixedPointMathLib.mulWad(sdaiUSDPrice, usdEurPrice);
 
         return (lastGoodPrice, false);
     }

@@ -139,8 +139,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 SDAI_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_EUR_STALENESS_THRESHOLD = 25 hours;
-    uint256 OSGNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 OSGNO_GNO_EUR_STALENESS_THRESHOLD = 25 hours;
 
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
@@ -708,23 +706,23 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // ETH
             vars.collaterals[0] = IERC20Metadata(WETH);
 
-            // wstETH
-            vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
+            // // wstETH
+            // vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
 
-            // RETH
-            vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
+            // // RETH
+            // vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
 
             // GNO
-            vars.collaterals[3] = IERC20Metadata(GNO_ADDRESS);
+            vars.collaterals[1] = IERC20Metadata(GNO_ADDRESS);
 
             // sDAI
-            vars.collaterals[4] = IERC20Metadata(SDAI_ADDRESS);
+            vars.collaterals[2] = IERC20Metadata(SDAI_ADDRESS);
 
             // WBTC
-            vars.collaterals[5] = IERC20Metadata(WBTC_ADDRESS);
+            vars.collaterals[3] = IERC20Metadata(WBTC_ADDRESS);
 
             // OSGNO
-            vars.collaterals[6] = IERC20Metadata(OSGNO_ADDRESS);
+            vars.collaterals[4] = IERC20Metadata(OSGNO_ADDRESS);
         } else {
             // Sepolia
             // Use WETH as collateral for the first branch
@@ -921,18 +919,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // mainnet
             // ETH
             if (_collTokenAddress == address(WETH)) {
-                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
-            } else if (_collTokenAddress == WSTETH_ADDRESS) {
-                // wstETH
-                return new WSTETHPriceFeed(
-                    ETH_ORACLE_ADDRESS,
-                    STETH_ORACLE_ADDRESS,
-                    WSTETH_ADDRESS,
-                    ETH_USD_STALENESS_THRESHOLD,
-                    STETH_USD_STALENESS_THRESHOLD,
-                    _borroweOperationsAddress
-                );
-            }
+                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, GNO_USD_EUR_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_USD_EUR_STALENESS_THRESHOLD, _borroweOperationsAddress);
+            } 
             // RETH
             if(_collTokenAddress == RETH_ADDRESS){
             return new RETHPriceFeed(

@@ -3,7 +3,7 @@
 pragma solidity 0.8.24;
  
 import "./CompositePriceFeed.sol";
-
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 contract WBTCPriceFeed is CompositePriceFeed {
     Oracle public btcUsdOracle;
@@ -73,13 +73,13 @@ contract WBTCPriceFeed is CompositePriceFeed {
             wBTCUsdPrice = LiquityMath._min(wBTCUsdPrice, btcUsdPrice);
         }
         
-        uint256 wBTCEurPrice = wBTCUsdPrice * usdEurPrice / 1e18;
+        uint256 wBTCEurPrice = FixedPointMathLib.mulWad(wBTCUsdPrice, usdEurPrice);
         // Otherwise, just use wBTC-USD price: USD_per_wBTC * EUR_per_USD.
         lastGoodPrice = wBTCEurPrice;
         return (wBTCEurPrice, false);
     }
 
-    function _getCanonicalRate() internal view override returns (uint256, bool) {
+    function _getCanonicalRate() internal pure override returns (uint256, bool) {
         return (1 * 10 ** 18, false); // always return 1 BTC per wBTC by default.
     }
 }   

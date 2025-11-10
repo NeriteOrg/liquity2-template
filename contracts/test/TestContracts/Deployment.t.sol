@@ -726,7 +726,8 @@ contract TestDeployer is MetadataDeployment {
         // ETH
         if (_branch == 0) {
             return new WETHPriceFeed(
-                _externalAddresses.ETHOracle, _oracleParams.ethUsdStalenessThreshold, _borrowerOperationsAddress
+                // TODO: THIS IS A PATCH TO GET TESTS TO RUN WITH ETH/EUR PRICEFEED changes
+                _externalAddresses.ETHOracle, _externalAddresses.ETHOracle, _oracleParams.ethUsdStalenessThreshold, _oracleParams.ethUsdStalenessThreshold, _borrowerOperationsAddress
             );
         } else if (_branch == 1) {
             // RETH

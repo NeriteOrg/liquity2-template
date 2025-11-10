@@ -3,13 +3,18 @@
 pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
-
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 // import "forge-std/console2.sol";
 
 contract WETHPriceFeed is MainnetPriceFeedBase {
-    constructor(address _ethUsdOracleAddress, uint256 _ethUsdStalenessThreshold, address _borrowerOperationsAddress)
+    Oracle public usdEurOracle;
+    constructor(address _ethUsdOracleAddress, address _usdEurOracleAddress, uint256 _ethUsdStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress)
         MainnetPriceFeedBase(_ethUsdOracleAddress, _ethUsdStalenessThreshold, _borrowerOperationsAddress)
     {
+        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
+        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+        assert(usdEurOracle.decimals != 0);
         _fetchPricePrimary();
 
         // Check the oracle didn't already fail
@@ -36,11 +41,14 @@ contract WETHPriceFeed is MainnetPriceFeedBase {
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         (uint256 ethUsdPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (ethUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
+        if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
 
-        lastGoodPrice = ethUsdPrice;
+        uint256 wETHUsdPrice = FixedPointMathLib.mulWad(ethUsdPrice, usdEurPrice);
+        lastGoodPrice = wETHUsdPrice;
         return (ethUsdPrice, false);
     }
 }
