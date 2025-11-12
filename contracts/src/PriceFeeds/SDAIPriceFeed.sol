@@ -53,7 +53,7 @@ contract SDAIPriceFeed is MainnetPriceFeedBase {
         if (eurUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
         
         uint256 sdaiUSDPrice = FixedPointMathLib.mulWadUp(daiUSDPrice, sdaiDaiRate);
-        lastGoodPrice = FixedPointMathLib.mulDiv(sdaiUSDPrice, eurUsdPrice, 1e18);
+        lastGoodPrice = FixedPointMathLib.divWad(sdaiUSDPrice, eurUsdPrice);
 
         return (lastGoodPrice, false);
     }

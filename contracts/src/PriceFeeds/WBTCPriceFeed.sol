@@ -73,7 +73,7 @@ contract WBTCPriceFeed is CompositePriceFeed {
             wBTCUsdPrice = LiquityMath._min(wBTCUsdPrice, btcUsdPrice);
         }
         
-        uint256 wBTCEurPrice = FixedPointMathLib.mulDiv(wBTCUsdPrice, eurUsdPrice, 1e18);
+        uint256 wBTCEurPrice = FixedPointMathLib.divWad(wBTCUsdPrice, eurUsdPrice);
         lastGoodPrice = wBTCEurPrice;
         return (wBTCEurPrice, false);
     }
