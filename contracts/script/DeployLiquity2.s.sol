@@ -108,6 +108,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address GNO_SDAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
     address GNO_WBTC_ADDRESS = 0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252;
     address GNO_GNO_ADDRESS = 0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb;
+    address GNO_DAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
+    address GNO_USDC_ADDRESS = 0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb;
 
     address GNO_WSTETH_ADDRESS = 0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6;
     address GNO_RETH_ADDRESS = 0xc791240D1F2dEf5938E2031364Ff4ed887133C3d;
@@ -119,12 +121,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
     address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
 
-    address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;
-    address GNO_GNO_USD_ORACLE_ADDRESS = 0x1D296b93a9679AEE6e6C307AAC537cCf0b2cC77c;  // api3
-    address GNO_EUR_USD_ORACLE_ADDRESS = 0xab70BCB260073d036d1660201e9d5405F5829b7a;
-    address GNO_DAI_USD_ORACLE_ADDRESS = 0x85b6dD270538325A9E0140bd6052Da4ecc18A85c;
-    address GNO_BTC_USD_ORACLE_ADDRESS = 0x6C1d7e76EF7304a40e8456ce883BC56d3dEA3F7d;
-    address GNO_WBTC_USD_ORACLE_ADDRESS = 0x00288135bE38B83249F380e9b6b9a04c90EC39eE;
+    address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272; //osGNO
+    address GNO_GNO_USD_ORACLE_ADDRESS = 0x1D296b93a9679AEE6e6C307AAC537cCf0b2cC77c; // api3
+    address GNO_EUR_USD_ORACLE_ADDRESS = 0xab70BCB260073d036d1660201e9d5405F5829b7a; // chainlink
+    address GNO_DAI_USD_ORACLE_ADDRESS = 0x85b6dD270538325A9E0140bd6052Da4ecc18A85c; // api3
+    address GNO_BTC_USD_ORACLE_ADDRESS = 0x6C1d7e76EF7304a40e8456ce883BC56d3dEA3F7d; // api3
+    address GNO_WBTC_USD_ORACLE_ADDRESS = 0x00288135bE38B83249F380e9b6b9a04c90EC39eE; // api3
 
     uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_GNO_EUR_STALENESS_THRESHOLD = 25 hours;
@@ -508,13 +510,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // deployed.contractsArray[1].collToken.mint(deployer, 1 ether);
             // deployed.contractsArray[1].collToken.approve(address(deployed.contractsArray[1].leverageZapper), 1 ether);
-            // deployed.contractsArray[1].leverageZapper.openLeveragedTroveWithRawETH{value: ETH_GAS_COMPENSATION}(
-            //     ILeverageZapper.OpenLeveragedTroveParams({
-            //         owner: deployer,
-            //         ownerIndex: 1,
-            //         collAmount: 1 ether,
-            //         flashLoanAmount: 1 ether,
-            //         boldAmount: 2_000 ether,
+            // deployed.contractsArray[1].leverageZapper.openLeveragedTroveWithRawETH{value:  
             //         upperHint: 0,
             //         lowerHint: 0,
             //         annualInterestRate: MIN_ANNUAL_INTEREST_RATE,
