@@ -8,14 +8,14 @@ import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 contract WBTCPriceFeed is CompositePriceFeed {
     Oracle public btcUsdOracle;
     Oracle public wBTCUsdOracle;
-    Oracle public usdEurOracle;
+    Oracle public eurUsdOracle;
 
     uint256 public constant BTC_WBTC_DEVIATION_THRESHOLD = 2e16; // 2%
 
     constructor(
         address _wBTCUsdOracleAddress, 
         address _btcUsdOracleAddress,
-        address _usdEurOracleAddress,
+        address _eurUsdOracleAddress,
         uint256 _wBTCUsdStalenessThreshold,
         uint256 _btcUsdStalenessThreshold,
         uint256 _usdEurStalenessThreshold,
@@ -23,9 +23,9 @@ contract WBTCPriceFeed is CompositePriceFeed {
     ) CompositePriceFeed(_wBTCUsdOracleAddress, _btcUsdOracleAddress, _wBTCUsdStalenessThreshold, _borrowerOperationsAddress)
     {
         // Store EUR-USD oracle
-        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
-        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
-        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+        eurUsdOracle.aggregator = AggregatorV3Interface(_eurUsdOracleAddress);
+        eurUsdOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        eurUsdOracle.decimals = eurUsdOracle.aggregator.decimals();
 
         // Store BTC-USD oracle
         btcUsdOracle.aggregator = AggregatorV3Interface(_btcUsdOracleAddress);
@@ -41,7 +41,7 @@ contract WBTCPriceFeed is CompositePriceFeed {
 
         // Check the oracles didn't already fail
         assert(priceSource == PriceSource.primary);
-        assert(usdEurOracle.decimals == 8);
+        assert(eurUsdOracle.decimals == 8);
     }
 
     function _fetchPricePrimary(bool _isRedemption) internal override returns (uint256, bool) {
@@ -49,9 +49,9 @@ contract WBTCPriceFeed is CompositePriceFeed {
         (uint256 wBTCUsdPrice, bool wBTCUsdOracleDown) = _getOracleAnswer(wBTCUsdOracle);
         (uint256 btcUsdPrice, bool btcOracleDown) = _getOracleAnswer(btcUsdOracle);
 
-        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
-        if (usdEurOracleDown) {
-            return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
+        (uint256 eurUsdPrice, bool eurUsdOracleDown) = _getOracleAnswer(eurUsdOracle);
+        if (eurUsdOracleDown) {
+            return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
         }
 
         // wBTC oracle is down or invalid answer
@@ -73,8 +73,7 @@ contract WBTCPriceFeed is CompositePriceFeed {
             wBTCUsdPrice = LiquityMath._min(wBTCUsdPrice, btcUsdPrice);
         }
         
-        uint256 wBTCEurPrice = FixedPointMathLib.mulWad(wBTCUsdPrice, usdEurPrice);
-        // Otherwise, just use wBTC-USD price: USD_per_wBTC * EUR_per_USD.
+        uint256 wBTCEurPrice = FixedPointMathLib.mulDiv(wBTCUsdPrice, eurUsdPrice);
         lastGoodPrice = wBTCEurPrice;
         return (wBTCEurPrice, false);
     }

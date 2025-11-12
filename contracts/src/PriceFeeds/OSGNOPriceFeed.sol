@@ -9,18 +9,18 @@ import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 // TODO: OSGNO/GNO (possibly ETH?  we'll have to figure that out) price feed 0x9B1b13afA6a57e54C03AD0428a4766C39707D272
 contract OSGNOPriceFeed is MainnetPriceFeedBase {
     Oracle public gnoUsdOracle;
-    Oracle public usdEurOracle;
+    Oracle public eurUsdOracle;
     
-    constructor(address _osgnoGnoOracleAddress, address _gnoUSDOracleAddress, address _usdEurOracleAddress, uint256 _osgnoGnoStalenessThreshold, uint256 _gnoUSDStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress)
+    constructor(address _osgnoGnoOracleAddress, address _gnoUSDOracleAddress, address _eurUsdOracleAddress, uint256 _osgnoGnoStalenessThreshold, uint256 _gnoUSDStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress)
         MainnetPriceFeedBase(_osgnoGnoOracleAddress, _osgnoGnoStalenessThreshold, _borrowerOperationsAddress)
     {
         gnoUsdOracle.aggregator = AggregatorV3Interface(_gnoUSDOracleAddress);
         gnoUsdOracle.stalenessThreshold = _gnoUSDStalenessThreshold;
         gnoUsdOracle.decimals = gnoUsdOracle.aggregator.decimals();
 
-        usdEurOracle.aggregator = AggregatorV3Interface(_usdEurOracleAddress);
-        usdEurOracle.stalenessThreshold = _usdEurStalenessThreshold;
-        usdEurOracle.decimals = usdEurOracle.aggregator.decimals();
+        eurUsdOracle.aggregator = AggregatorV3Interface(_eurUsdOracleAddress);
+        eurUsdOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        eurUsdOracle.decimals = eurUsdOracle.aggregator.decimals();
 
         _fetchPricePrimary();
 
@@ -50,16 +50,16 @@ contract OSGNOPriceFeed is MainnetPriceFeedBase {
         // ethUsd is the osGno/Gno oracle
         (uint256 osGnoGnoPrice, bool ethUsdOracleDown) = _getOracleAnswer(ethUsdOracle);
         (uint256 gnoUSDPrice, bool gnoEurOracleDown) = _getOracleAnswer(gnoUsdOracle);
-        (uint256 usdEurPrice, bool usdEurOracleDown) = _getOracleAnswer(usdEurOracle);
+        (uint256 eurUsdPrice, bool eurUsdOracleDown) = _getOracleAnswer(eurUsdOracle);
 
         // If the ETH-USD Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (ethUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
         if (gnoEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(gnoUsdOracle.aggregator)), true);
-        if (usdEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(usdEurOracle.aggregator)), true);
+        if (eurUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
 
         // convert usd to eur
         uint256 osgnoUsdPrice = FixedPointMathLib.mulWadUp(osGnoGnoPrice, gnoUSDPrice);
-        uint256 osgnoEurPrice = FixedPointMathLib.mulWad(osgnoUsdPrice, usdEurPrice);
+        uint256 osgnoEurPrice = FixedPointMathLib.mulDiv(osgnoUsdPrice, eurUsdPrice);
         
         lastGoodPrice = osgnoEurPrice;
         return (osgnoEurPrice, false);
