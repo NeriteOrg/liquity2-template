@@ -59,7 +59,7 @@ contract OSGNOPriceFeed is MainnetPriceFeedBase {
 
         // convert usd to eur
         uint256 osgnoUsdPrice = FixedPointMathLib.mulWadUp(osGnoGnoPrice, gnoUSDPrice);
-        uint256 osgnoEurPrice = FixedPointMathLib.mulDiv(osgnoUsdPrice, eurUsdPrice);
+        uint256 osgnoEurPrice = FixedPointMathLib.mulDiv(osgnoUsdPrice, eurUsdPrice, 1e18);
         
         lastGoodPrice = osgnoEurPrice;
         return (osgnoEurPrice, false);

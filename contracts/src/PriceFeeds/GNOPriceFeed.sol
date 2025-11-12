@@ -49,7 +49,7 @@ contract GNOPriceFeed is MainnetPriceFeedBase {
         if (eurUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
 
         // convert usd to eur
-        uint256 gnoEurPrice = FixedPointMathLib.mulDiv(ethUsdPrice, eurUsdPrice);
+        uint256 gnoEurPrice = FixedPointMathLib.mulDiv(ethUsdPrice, eurUsdPrice, 1e18);
         
         lastGoodPrice = gnoEurPrice;
         return (gnoEurPrice, false);

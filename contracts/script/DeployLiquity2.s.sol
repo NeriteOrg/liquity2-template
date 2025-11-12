@@ -129,7 +129,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_GNO_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_OSGNO_GNO_STALENESS_THRESHOLD = 25 hours;
-    uint256 GNO_USD_EUR_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_EUR_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_DAI_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_DAI_USD_STALENESS_THRESHOLD = 25 hours;
@@ -439,55 +439,37 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         collSymbols[1] = "GNO";
 
         //SDAI
-        uint256 CCR_SDAI = 150 * _1pct;
-        uint256 MCR_SDAI = 110 * _1pct;
-        uint256 SCR_SDAI = 110 * _1pct;
-        uint256 LIQUIDATION_PENALTY_SP_SDAI = 5 * _1pct;
-        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_SDAI = 10 * _1pct;
-
         troveManagerParamsArray[2] = TroveManagerParams({
-            CCR: CCR_SDAI,
-            MCR: MCR_SDAI,
-            SCR: SCR_SDAI,
+            CCR: 150 * _1pct,
+            MCR: 110 * _1pct,
+            SCR: 110 * _1pct,
             BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SDAI,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SDAI
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
         collNames[2] = "Synthetix sDAI";
         collSymbols[2] = "sDAI";
 
         //WBTC
-        uint256 CCR_WBTC = 150 * _1pct;
-        uint256 MCR_WBTC = 110 * _1pct;
-        uint256 SCR_WBTC = 110 * _1pct;
-        uint256 LIQUIDATION_PENALTY_SP_WBTC = 5 * _1pct;
-        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WBTC = 10 * _1pct;
-
         troveManagerParamsArray[3] = TroveManagerParams({
-            CCR: CCR_WBTC,
-            MCR: MCR_WBTC,
-            SCR: SCR_WBTC,
+            CCR: 150 * _1pct,
+            MCR: 110 * _1pct,
+            SCR: 110 * _1pct,
             BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WBTC,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WBTC
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
         collNames[3] = "Wrapped Bitcoin";
         collSymbols[3] = "WBTC";
 
         //OSGNO
-        uint256 CCR_OSGNO = 150 * _1pct;
-        uint256 MCR_OSGNO = 110 * _1pct;
-        uint256 SCR_OSGNO = 110 * _1pct;
-        uint256 LIQUIDATION_PENALTY_SP_OSGNO = 5 * _1pct;
-        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_OSGNO = 10 * _1pct;
-
         troveManagerParamsArray[4] = TroveManagerParams({
-            CCR: CCR_OSGNO,
-            MCR: MCR_OSGNO,
-            SCR: SCR_OSGNO,
+            CCR: 150 * _1pct,
+            MCR: 110 * _1pct,
+            SCR: 110 * _1pct,
             BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_OSGNO,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_OSGNO
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
         collNames[4] = "Osmosis GNO";
         collSymbols[4] = "OSGNO";
@@ -551,14 +533,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         }
 
         // Governance
-        (address governanceAddress, string memory governanceManifest) = deployGovernance(
+        string memory governanceManifest = _deployAndVerifyGovernance(
             deployGovernanceParams,
             address(curveStableswapFactory),
             address(deployed.usdcCurvePool),
             address(lusdCurvePool)
         );
-        address computedGovernanceAddress = computeGovernanceAddress(deployGovernanceParams);
-        assert(governanceAddress == computedGovernanceAddress);
 
         vm.stopBroadcast();
 
@@ -612,6 +592,23 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             openDemoTroves(demoTroves, deployed.contractsArray);
         }
+    }
+
+    function _deployAndVerifyGovernance(
+        DeployGovernanceParams memory deployGovernanceParams,
+        address curveStableswapFactoryAddr,
+        address usdcCurvePoolAddr,
+        address lusdCurvePoolAddr
+    ) internal returns (string memory governanceManifest) {
+        (address governanceAddress, string memory manifest) = deployGovernance(
+            deployGovernanceParams,
+            curveStableswapFactoryAddr,
+            usdcCurvePoolAddr,
+            lusdCurvePoolAddr
+        );
+        address computedGovernanceAddress = computeGovernanceAddress(deployGovernanceParams);
+        assert(governanceAddress == computedGovernanceAddress);
+        return manifest;
     }
 
     function tapFaucet(uint256[] memory accounts, LiquityContracts memory contracts) internal {
@@ -919,7 +916,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // mainnet
             // ETH
             if (_collTokenAddress == address(WETH)) {
-                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_USD_EUR_STALENESS_THRESHOLD, _borroweOperationsAddress);
+                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
             } 
             // RETH
             if(_collTokenAddress == RETH_ADDRESS){
@@ -935,9 +932,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             if(_collTokenAddress == GNO_ADDRESS){
                 return new GNOPriceFeed(
                     GNO_GNO_USD_ORACLE_ADDRESS,
-                    GNO_GNO_EUR_ORACLE_ADDRESS,
+                    GNO_EUR_USD_ORACLE_ADDRESS,
                     GNO_GNO_USD_STALENESS_THRESHOLD,
-                    GNO_GNO_EUR_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress
                 );
             }
@@ -946,7 +943,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     GNO_DAI_USD_ORACLE_ADDRESS,
                     GNO_EUR_USD_ORACLE_ADDRESS,
                     GNO_DAI_USD_STALENESS_THRESHOLD,
-                    GNO_USD_EUR_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress,
                     SDAI_ADDRESS
                 );
@@ -958,7 +955,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     GNO_EUR_USD_ORACLE_ADDRESS,
                     GNO_WBTC_USD_STALENESS_THRESHOLD,
                     GNO_BTC_USD_STALENESS_THRESHOLD,
-                    GNO_USD_EUR_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress
                 );
             }
@@ -969,7 +966,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     GNO_EUR_USD_ORACLE_ADDRESS,
                     GNO_OSGNO_GNO_STALENESS_THRESHOLD,
                     GNO_GNO_USD_STALENESS_THRESHOLD,
-                    GNO_USD_EUR_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress
                 );
             }

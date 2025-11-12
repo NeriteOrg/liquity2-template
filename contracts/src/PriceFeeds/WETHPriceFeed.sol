@@ -47,7 +47,7 @@ contract WETHPriceFeed is MainnetPriceFeedBase {
         if (ethUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
         if (eurUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
 
-        uint256 wETHUsdPrice = FixedPointMathLib.mulDiv(ethUsdPrice, eurUsdPrice);
+        uint256 wETHUsdPrice = FixedPointMathLib.mulDiv(ethUsdPrice, eurUsdPrice, 1e18);
         lastGoodPrice = wETHUsdPrice;
         return (ethUsdPrice, false);
     }
