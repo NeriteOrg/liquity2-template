@@ -15,9 +15,9 @@ export const WHITE_LABEL_CONFIG = {
     secondaryContent: "black:700" as const,
     secondaryContentAlt: "black:400" as const,
 
-    accent1: "evro:pink" as const, // #F5889B (Evro brand pink/coral)
+    accent1: "evro:orange" as const, // #efa960 (Evro brand orange)
     accent1Content: "white" as const,
-    accent1ContentAlt: "evro:pinkLight" as const,
+    accent1ContentAlt: "white" as const,
 
     accent2: "evro:blue" as const, // #7176ca (vivid blue for CTAs/links)
     accent2Content: "white" as const,
@@ -29,9 +29,9 @@ export const WHITE_LABEL_CONFIG = {
   // ===========================
   typography: {
     // Font family for CSS (used in Panda config)
-    fontFamily: "Oswald, sans-serif",
+    fontFamily: "Oswald, Lexend Zetta, sans-serif",
     // Next.js font import name (should match the import)
-    fontImport: "Oswald" as const,
+    fontImport: "Oswald, Lexend Zetta" as const,
   },
 
   // ===========================
@@ -44,7 +44,7 @@ export const WHITE_LABEL_CONFIG = {
       symbol: "EVRO" as const,
       ticker: "EVRO",
       decimals: 18,
-      description: "USD-pegged stablecoin by EVRO Finance",
+      description: "Euro-pegged stablecoin by EVRO Finance",
       icon: "main-token",
       // Core protocol contracts (deployment addresses TBD)
       deployments: {
@@ -79,12 +79,31 @@ export const WHITE_LABEL_CONFIG = {
       },
     },
 
+    evro: {
+      name: "EVRO",
+      symbol: "EVRO" as const,
+      ticker: "EVRO",
+      icon: "evro",
+      decimals: 18,
+      description: "Euro-pegged stablecoin by EVRO Finance",
+      deployments: {
+        646: {
+          token: "0x0000000000000000000000000000000000000000",
+          collateralRegistry: "0x0000000000000000000000000000000000000000",
+          governance: "0x0000000000000000000000000000000000000000",
+          hintHelpers: "0x0000000000000000000000000000000000000000",
+          multiTroveGetter: "0x0000000000000000000000000000000000000000",
+          exchangeHelpers: "0x0000000000000000000000000000000000000000",
+        },
+      },
+    },
+
     // Governance token (exists but no functionality at launch)
     governanceToken: {
       name: "EVRO Governance Token",
       symbol: "GOV" as const,
       ticker: "GOV",
-      icon: "governance-token",
+      icon: "main-token",
       // Only used as collateral, no governance features
       deployments: {
         646: {
@@ -187,7 +206,7 @@ export const WHITE_LABEL_CONFIG = {
       staked: {
         symbol: "sEVRO" as const,
         name: "Staked EVRO",
-        icon: "staked-main-token",
+        icon: "main-token",
       },
       lusd: {
         symbol: "LUSD" as const,
@@ -202,8 +221,8 @@ export const WHITE_LABEL_CONFIG = {
   // ===========================
   branding: {
     // Core app identity
-    appName: "EVRO Finance V2", // Full app name for titles, about pages
-    brandName: "EVRO Finance", // Core brand name for protocol/version references
+    appName: "EVRO Portal", // Full app name for titles, about pages
+    brandName: "EVRO", // Core brand name for protocol/version references
     appTagline: "Multi-chain stablecoin protocol",
     appDescription: "Borrow EVRO against multiple collateral types",
     appUrl: "https://evrofinance.com/",
