@@ -18,13 +18,28 @@ uint256 constant MAX_LIQUIDATION_PENALTY_REDISTRIBUTION = 20e16; // 20%
 
 // Collateral branch parameters (SETH = staked ETH, i.e. wstETH / rETH)
 uint256 constant CCR_WETH = 150 * _1pct;
-uint256 constant CCR_SETH = 160 * _1pct;
-
 uint256 constant MCR_WETH = 110 * _1pct;
-uint256 constant MCR_SETH = 120 * _1pct;
-
 uint256 constant SCR_WETH = 110 * _1pct;
-uint256 constant SCR_SETH = 120 * _1pct;
+
+uint256 constant CCR_SETH = 160 * _1pct;
+uint256 constant MCR_SETH = 130 * _1pct;
+uint256 constant SCR_SETH = 115 * _1pct;
+
+uint256 constant CCR_GNO = 165 * _1pct;
+uint256 constant MCR_GNO = 140 * _1pct;
+uint256 constant SCR_GNO = 115 * _1pct;
+
+uint256 constant CCR_SDAI = 160 * _1pct;
+uint256 constant MCR_SDAI = 130 * _1pct;
+uint256 constant SCR_SDAI = 115 * _1pct;
+
+uint256 constant CCR_WBTC = 150 * _1pct;
+uint256 constant MCR_WBTC = 115 * _1pct;
+uint256 constant SCR_WBTC = 110 * _1pct;
+
+uint256 constant CCR_OSGNO = 165 * _1pct;
+uint256 constant MCR_OSGNO = 140 * _1pct;
+uint256 constant SCR_OSGNO = 115 * _1pct;
 
 // Batch CR buffer (same for all branches for now)
 // On top of MCR to join a batch, or adjust inside a batch

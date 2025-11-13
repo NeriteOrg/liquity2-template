@@ -399,9 +399,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         });
 
         // WETH
-        uint256 CCR_WETH = 150 * _1pct;
-        uint256 MCR_WETH = 110 * _1pct;
-        uint256 SCR_WETH = 110 * _1pct;
         uint256 LIQUIDATION_PENALTY_SP_WETH = 5 * _1pct;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
 
@@ -435,9 +432,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         //SDAI
         troveManagerParamsArray[2] = TroveManagerParams({
-            CCR: 150 * _1pct,
-            MCR: 110 * _1pct,
-            SCR: 110 * _1pct,
+            CCR: CCR_SDAI,
+            MCR: MCR_SDAI,
+            SCR: SCR_SDAI,
             BCR: BCR_ALL,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
@@ -448,9 +445,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         //WBTC
         troveManagerParamsArray[3] = TroveManagerParams({
-            CCR: 150 * _1pct,
-            MCR: 110 * _1pct,
-            SCR: 110 * _1pct,
+            CCR: CCR_WBTC,
+            MCR: MCR_WBTC,
+            SCR: SCR_WBTC,
             BCR: BCR_ALL,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
@@ -461,9 +458,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         //OSGNO
         troveManagerParamsArray[4] = TroveManagerParams({
-            CCR: 150 * _1pct,
-            MCR: 110 * _1pct,
-            SCR: 110 * _1pct,
+            CCR: CCR_OSGNO,
+            MCR: MCR_OSGNO,
+            SCR: SCR_OSGNO,
             BCR: BCR_ALL,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
