@@ -380,8 +380,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // // rETH (same as wstETH)
         // troveManagerParamsArray[2] = troveManagerParamsArray[1];
 
-        string[] memory collNames = new string[](NUM_BRANCHES);
-        string[] memory collSymbols = new string[](NUM_BRANCHES);
+        // Names/symbols for branches 1..(NUM_BRANCHES-1). Branch 0 (WETH) is excluded.
+        string[] memory collNames = new string[](NUM_BRANCHES - 1);
+        string[] memory collSymbols = new string[](NUM_BRANCHES - 1);
         // collNames[0] = "Wrapped liquid staked Ether 2.0";
         // collSymbols[0] = "wstETH";
         // collNames[1] = "Rocket Pool ETH";
@@ -404,8 +405,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         uint256 LIQUIDATION_PENALTY_SP_WETH = 5 * _1pct;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
 
-        collNames[0] = "Wrapped Ether";
-        collSymbols[0] = "WETH";
         troveManagerParamsArray[0] = TroveManagerParams({
             CCR: CCR_WETH,
             MCR: MCR_WETH,
@@ -430,8 +429,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_GNO,
             LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_GNO
         });
-        collNames[1] = "Gnosis";
-        collSymbols[1] = "GNO";
+        // Branch 1 → index 0 in collNames/collSymbols
+        collNames[0] = "Gnosis";
+        collSymbols[0] = "GNO";
 
         //SDAI
         troveManagerParamsArray[2] = TroveManagerParams({
@@ -442,8 +442,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
-        collNames[2] = "Savings sDAI";
-        collSymbols[2] = "sDAI";
+        // Branch 2 → index 1
+        collNames[1] = "Savings sDAI";
+        collSymbols[1] = "sDAI";
 
         //WBTC
         troveManagerParamsArray[3] = TroveManagerParams({
@@ -454,8 +455,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
-        collNames[3] = "Wrapped Bitcoin";
-        collSymbols[3] = "WBTC";
+        // Branch 3 → index 2
+        collNames[2] = "Wrapped Bitcoin";
+        collSymbols[2] = "WBTC";
 
         //OSGNO
         troveManagerParamsArray[4] = TroveManagerParams({
@@ -466,8 +468,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             LIQUIDATION_PENALTY_SP: 5 * _1pct,
             LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
         });
-        collNames[4] = "Osmosis GNO";
-        collSymbols[4] = "OSGNO";
+        // Branch 4 → index 3
+        collNames[3] = "Osmosis GNO";
+        collSymbols[3] = "OSGNO";
 
 
         DeploymentResult memory deployed =
