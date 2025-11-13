@@ -335,13 +335,13 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         if (block.chainid == 100) {
             // mainnet
-            WETH = IWETH(WETH_ADDRESS);
-            USDC = IERC20Metadata(USDC_ADDRESS);
+            WETH = IWETH(GNO_WETH_ADDRESS);
+            USDC = IERC20Metadata(GNO_USDC_ADDRESS);
             curveStableswapFactory = curveStableswapFactoryMainnet;
-            uniV3Router = uniV3RouterMainnet;
-            uniV3Quoter = uniV3QuoterMainnet;
-            uniswapV3Factory = uniswapV3FactoryMainnet;
-            uniV3PositionManager = uniV3PositionManagerMainnet;
+            uniV3Router = address(0); //uniV3RouterMainnet;
+            uniV3Quoter = address(0); //uniV3QuoterMainnet;
+            uniswapV3Factory = address(0); //uniswapV3FactoryMainnet;
+            uniV3PositionManager = address(0); //uniV3PositionManagerMainnet;
             balancerFactory = balancerFactoryMainnet;
             lqty = LQTY_ADDRESS;
             stakingV1 = LQTY_STAKING_ADDRESS;
@@ -899,9 +899,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             address(contracts.activePool)
         );
 
-        // deploy zappers
-        (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
-            _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
+        // deploy zappers TODO: Not possible until univ3 is on gnosis
+        // (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
+        //     _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
     }
 
     function _deployPriceFeed(address _collTokenAddress, address _borroweOperationsAddress)
@@ -925,7 +925,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 _borroweOperationsAddress
             );
             }
-            if(_collTokenAddress == GNO_ADDRESS){
+            if(_collTokenAddress == GNO_GNO_ADDRESS){
                 return new GNOPriceFeed(
                     GNO_GNO_USD_ORACLE_ADDRESS,
                     GNO_EUR_USD_ORACLE_ADDRESS,
@@ -934,17 +934,17 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     _borroweOperationsAddress
                 );
             }
-            if(_collTokenAddress == SDAI_ADDRESS){
+            if(_collTokenAddress == GNO_SDAI_ADDRESS){
                 return new SDAIPriceFeed(
                     GNO_DAI_USD_ORACLE_ADDRESS,
                     GNO_EUR_USD_ORACLE_ADDRESS,
                     GNO_DAI_USD_STALENESS_THRESHOLD,
                     GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress,
-                    SDAI_ADDRESS
+                    GNO_SDAI_ADDRESS
                 );
             }
-            if(_collTokenAddress == WBTC_ADDRESS){
+            if(_collTokenAddress == GNO_WBTC_ADDRESS){
                 return new WBTCPriceFeed(
                     GNO_WBTC_USD_ORACLE_ADDRESS,
                     GNO_BTC_USD_ORACLE_ADDRESS,
@@ -955,7 +955,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     _borroweOperationsAddress
                 );
             }
-            if(_collTokenAddress == OSGNO_ADDRESS){
+            if(_collTokenAddress == GNO_OSGNO_ADDRESS){
                 return new OSGNOPriceFeed(
                     GNO_OSGNO_GNO_ORACLE_ADDRESS,
                     GNO_GNO_USD_ORACLE_ADDRESS,
@@ -983,8 +983,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IExchange hybridExchange = new HybridCurveUniV3Exchange(
             _collToken,
             _boldToken,
-            USDC,
-            WETH,
+            GNO_USDC_ADDRESS,
+            GNO_WETH_ADDRESS,
             _usdcCurvePool,
             OTHER_TOKEN_INDEX, // USDC Curve pool index
             BOLD_TOKEN_INDEX, // BOLD Curve pool index
