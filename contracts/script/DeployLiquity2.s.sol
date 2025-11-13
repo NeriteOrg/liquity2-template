@@ -399,9 +399,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         });
 
         // WETH
-        uint256 LIQUIDATION_PENALTY_SP_WETH = 5 * _1pct;
-        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
-
         troveManagerParamsArray[0] = TroveManagerParams({
             CCR: CCR_WETH,
             MCR: MCR_WETH,
@@ -412,9 +409,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         });
 
         // GNO
-        uint256 CCR_GNO = 150 * _1pct;
-        uint256 MCR_GNO = 110 * _1pct;
-        uint256 SCR_GNO = 110 * _1pct;
+
         uint256 LIQUIDATION_PENALTY_SP_GNO = 5 * _1pct;
         uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_GNO = 10 * _1pct;
 
