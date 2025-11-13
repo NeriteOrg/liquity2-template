@@ -18,10 +18,15 @@ import { TransactionFlow } from "@/src/services/TransactionFlow";
 import { SubgraphStatus } from "@/src/services/SubgraphStatus";
 import { UiKit } from "@liquity2/uikit";
 import { Analytics } from "@vercel/analytics/react";
-import { Oswald } from "next/font/google";
+import { Lexend_Zetta, Oswald } from "next/font/google";
 
 const oswald = Oswald({
 	variable: "--font-oswald",
+	subsets: ["latin"],
+});
+
+const lexendZetta = Lexend_Zetta({
+	variable: "--font-lexend-zetta",
 	subsets: ["latin"],
 });
 
@@ -44,7 +49,7 @@ export default function Layout({
 }) {
 	return (
 		<html lang="en">
-			<body className={`${oswald.variable} antialiased`}>
+			<body className={`${oswald.variable} ${lexendZetta.variable} antialiased`}>
 				<ReactQuery>
 					<UiKit>
 						<StoredState>
