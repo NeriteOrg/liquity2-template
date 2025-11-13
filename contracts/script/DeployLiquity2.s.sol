@@ -120,7 +120,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
     address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
 
-    address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272; // osGNO
+    address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;// osGNO
     address GNO_GNO_USD_ORACLE_ADDRESS = 0x1D296b93a9679AEE6e6C307AAC537cCf0b2cC77c; // api3
     address GNO_EUR_USD_ORACLE_ADDRESS = 0xab70BCB260073d036d1660201e9d5405F5829b7a; // chainlink
     address GNO_DAI_USD_ORACLE_ADDRESS = 0x85b6dD270538325A9E0140bd6052Da4ecc18A85c; // api3
@@ -128,18 +128,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address GNO_WBTC_USD_ORACLE_ADDRESS = 0x00288135bE38B83249F380e9b6b9a04c90EC39eE; // chainlink
 
     uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 GNO_GNO_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_OSGNO_GNO_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_EUR_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 GNO_ETH_EUR_STALENESS_THRESHOLD = 25 hours;
-    uint256 GNO_DAI_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_DAI_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_BTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 SDAI_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 SDAI_EUR_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 WBTC_EUR_STALENESS_THRESHOLD = 25 hours;
 
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
@@ -337,10 +331,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             WETH = IWETH(GNO_WETH_ADDRESS);
             USDC = IERC20Metadata(GNO_USDC_ADDRESS);
             curveStableswapFactory = curveStableswapFactoryMainnet;
-            uniV3Router = address(0); //uniV3RouterMainnet;
-            uniV3Quoter = address(0); //uniV3QuoterMainnet;
-            uniswapV3Factory = address(0); //uniswapV3FactoryMainnet;
-            uniV3PositionManager = address(0); //uniV3PositionManagerMainnet;
+            uniV3Router = ISwapRouter(address(0)); //uniV3RouterMainnet;
+            uniV3Quoter = IQuoterV2(address(0)); //uniV3QuoterMainnet;
+            uniswapV3Factory = IUniswapV3Factory(address(0)); //uniswapV3FactoryMainnet;
+            uniV3PositionManager = INonfungiblePositionManager(address(0)); //uniV3PositionManagerMainnet;
             balancerFactory = balancerFactoryMainnet;
             lqty = LQTY_ADDRESS;
             stakingV1 = LQTY_STAKING_ADDRESS;
@@ -982,8 +976,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IExchange hybridExchange = new HybridCurveUniV3Exchange(
             _collToken,
             _boldToken,
-            GNO_USDC_ADDRESS,
-            GNO_WETH_ADDRESS,
+            USDC,
+            WETH,
             _usdcCurvePool,
             OTHER_TOKEN_INDEX, // USDC Curve pool index
             BOLD_TOKEN_INDEX, // BOLD Curve pool index
