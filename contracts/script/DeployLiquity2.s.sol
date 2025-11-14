@@ -35,6 +35,7 @@ import "test/Utils/Logging.sol";
 import "test/Utils/StringEquality.sol";
 import "src/Zappers/WETHZapper.sol";
 import "src/Zappers/GasCompZapper.sol";
+import "src/Zappers/WBTCZapper.sol";
 import "src/Zappers/LeverageLSTZapper.sol";
 import "src/Zappers/LeverageWETHZapper.sol";
 import "src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol";
@@ -60,9 +61,20 @@ import {OSGNOPriceFeed} from "src/PriceFeeds/OSGNOPriceFeed.sol";
 import {SDAIPriceFeed} from "src/PriceFeeds/SDAIPriceFeed.sol";
 import {WBTCPriceFeed} from "src/PriceFeeds/WBTCPriceFeed.sol";
 import {WBTCWrapper} from "src/Dependencies/WBTCWrapper.sol";
+import {IWBTCZapper} from "src/Interfaces/IWBTCZapper.sol";
+
 
 function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) {
     return block.timestamp / 1 weeks * 1 weeks;
+}
+
+// Mock WBTC for testnet deployment
+contract MockWBTC is ERC20Faucet {
+    constructor() ERC20Faucet("Wrapped Bitcoin", "WBTC", 100 ether, 1 days) {}
+    
+    function decimals() public pure override(ERC20) returns (uint8) {
+        return 8;
+    }
 }
 
 contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats, MetadataDeployment, Logging {
@@ -137,6 +149,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
+
+    address GNO_WBTC_WRAPPER_ADDRESS = 0x0000000000000000000000000000000000000000;
 
     address governor;
 
@@ -216,6 +230,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IERC20Metadata collToken;
         WETHZapper wethZapper;
         GasCompZapper gasCompZapper;
+        IWBTCZapper wbtcZapper;
         ILeverageZapper leverageZapper;
     }
 
@@ -718,8 +733,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // sDAI
             vars.collaterals[2] = IERC20Metadata(SDAI_ADDRESS);
 
-            // WBTC
-            vars.collaterals[3] = IERC20Metadata(WBTC_ADDRESS);
+            // WBTC - deploy wrapper
+            WBTCWrapper wbtcWrapper = new WBTCWrapper(GNO_WBTC_ADDRESS);
+            GNO_WBTC_WRAPPER_ADDRESS = address(wbtcWrapper);
+            vars.collaterals[3] = IERC20Metadata(GNO_WBTC_WRAPPER_ADDRESS);
 
             // OSGNO
             vars.collaterals[4] = IERC20Metadata(OSGNO_ADDRESS);
@@ -730,12 +747,20 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // Deploy plain ERC20Faucets for the rest of the branches
             for (vars.i = 1; vars.i < vars.numCollaterals; vars.i++) {
-                vars.collaterals[vars.i] = new ERC20Faucet(
-                    _collNames[vars.i - 1], //   _name
-                    _collSymbols[vars.i - 1], // _symbol
-                    100 ether, //     _tapAmount
-                    1 days //         _tapPeriod
-                );
+                // Branch 3 (index 3) is WBTC - deploy wrapper
+                if (vars.i == 3) {
+                    // Deploy mock WBTC for testing (8 decimals)
+                    MockWBTC mockWBTC = new MockWBTC();
+                    WBTCWrapper wbtcWrapper = new WBTCWrapper(address(mockWBTC));
+                    vars.collaterals[vars.i] = IERC20Metadata(address(wbtcWrapper));
+                } else {
+                    vars.collaterals[vars.i] = new ERC20Faucet(
+                        _collNames[vars.i - 1], //   _name
+                        _collSymbols[vars.i - 1], // _symbol
+                        100 ether, //     _tapAmount
+                        1 days //         _tapPeriod
+                    );
+                }
             }
         }
 
@@ -907,7 +932,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
 
         // deploy zappers
-        (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
+        (contracts.gasCompZapper, contracts.wethZapper, contracts.wbtcZapper, contracts.leverageZapper) =
             _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
     }
 
@@ -951,7 +976,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     GNO_SDAI_ADDRESS
                 );
             }
-            if(_collTokenAddress == GNO_WBTC_ADDRESS){
+            if(_collTokenAddress == GNO_WBTC_WRAPPER_ADDRESS){
                 return new WBTCPriceFeed(
                     GNO_WBTC_USD_ORACLE_ADDRESS,
                     GNO_BTC_USD_ORACLE_ADDRESS,
@@ -984,7 +1009,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IERC20 _collToken,
         IBoldToken _boldToken,
         ICurveStableswapNGPool _usdcCurvePool
-    ) internal returns (GasCompZapper gasCompZapper, WETHZapper wethZapper, ILeverageZapper leverageZapper) {
+    ) internal returns (GasCompZapper gasCompZapper, WETHZapper wethZapper, WBTCZapper wbtcZapper, ILeverageZapper leverageZapper) {
         IFlashLoanProvider flashLoanProvider = new BalancerFlashLoan();
 
         IExchange hybridExchange = new HybridCurveUniV3Exchange(
@@ -1002,7 +1027,29 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         bool lst = _collToken != WETH;
         if (lst) {
-            gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            // Detect ERC20Wrapper-style collateral (WBTC wrapper)
+            (bool ok, bytes memory ret) = address(_collToken).staticcall(
+                abi.encodeWithSignature("underlying()")
+            );
+            if (ok) {
+                address underlying = abi.decode(ret, (address));
+                // Check if underlying has 8 decimals (WBTC)
+                (bool decimalsOk, bytes memory decimalsRet) = underlying.staticcall(
+                    abi.encodeWithSignature("decimals()")
+                );
+                if (decimalsOk) {
+                    uint8 decimals = abi.decode(decimalsRet, (uint8));
+                    if (decimals == 8) {
+                        wbtcZapper = new WBTCZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                    } else {
+                        gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                    }
+                } else {
+                    gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                }
+            } else {
+                gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            }
         } else {
             wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
@@ -1290,6 +1337,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 ),
                 string.concat(
                     string.concat('"gasCompZapper":"', address(c.gasCompZapper).toHexString(), '",'),
+                    string.concat('"wbtcZapper":"', address(c.wbtcZapper).toHexString(), '",'),
                     string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '"') // no comma
                 )
             ),
