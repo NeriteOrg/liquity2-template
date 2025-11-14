@@ -10,7 +10,7 @@ uint256 constant _100pct = DECIMAL_PRECISION;
 uint256 constant _1pct = DECIMAL_PRECISION / 100;
 
 // Amount of xDAI to be locked in gas pool on opening troves
-uint256 constant ETH_GAS_COMPENSATION = .05 ether;
+uint256 constant ETH_GAS_COMPENSATION = 1 ether;
 
 // Liquidation
 uint256 constant MIN_LIQUIDATION_PENALTY_SP = 5e16; // 5%

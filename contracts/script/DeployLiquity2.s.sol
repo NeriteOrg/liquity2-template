@@ -59,6 +59,7 @@ import {GNOPriceFeed} from "src/PriceFeeds/GNOPriceFeed.sol";
 import {OSGNOPriceFeed} from "src/PriceFeeds/OSGNOPriceFeed.sol";
 import {SDAIPriceFeed} from "src/PriceFeeds/SDAIPriceFeed.sol";
 import {WBTCPriceFeed} from "src/PriceFeeds/WBTCPriceFeed.sol";
+import {WBTCWrapper} from "src/Dependencies/WBTCWrapper.sol";
 
 function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) {
     return block.timestamp / 1 weeks * 1 weeks;
@@ -126,6 +127,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address GNO_DAI_USD_ORACLE_ADDRESS = 0x85b6dD270538325A9E0140bd6052Da4ecc18A85c; // api3
     address GNO_BTC_USD_ORACLE_ADDRESS = 0x6C1d7e76EF7304a40e8456ce883BC56d3dEA3F7d; // chainlink
     address GNO_WBTC_USD_ORACLE_ADDRESS = 0x00288135bE38B83249F380e9b6b9a04c90EC39eE; // chainlink
+    address GNO_ETH_USD_ORACLE_ADDRESS = 0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473; // api3
 
     uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_OSGNO_GNO_STALENESS_THRESHOLD = 25 hours;
@@ -134,6 +136,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_BTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
+
+    address governor;
 
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
@@ -144,6 +149,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // Mainnet
     ICurveStableswapNGFactory constant curveStableswapFactoryMainnet =
         ICurveStableswapNGFactory(0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf);
+
+    ICurveStableswapNGFactory constant curveStableswapFactoryGnosis =
+        ICurveStableswapNGFactory(0xbC0797015fcFc47d9C1856639CaE50D0e69FbEE8);
+        
     uint128 constant BOLD_TOKEN_INDEX = 0;
     uint128 constant OTHER_TOKEN_INDEX = 1;
 
@@ -170,7 +179,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     // Balancer
-    IVault constant balancerVault = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
+    IVault constant balancerVault = IVault(0xbA1333333333a1BA1108E8412f11850A5C319bA9); //IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
     IWeightedPoolFactory balancerFactory;
     // Sepolia
     // https://docs.balancer.fi/reference/contracts/deployment-addresses/sepolia.html
@@ -180,6 +189,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     IWeightedPoolFactory constant balancerFactoryMainnet =
         IWeightedPoolFactory(0x897888115Ada5773E02aA29F775430BFB5F34c51);
+    // Gnosis
+    IWeightedPoolFactory constant balancerFactoryGnosis =
+        IWeightedPoolFactory(0xAc27df81663d139072E615855eF9aB0Af3FBD281);
 
     bytes32 SALT;
     address deployer;
@@ -282,6 +294,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             vm.startBroadcast(privateKey);
         }
 
+        if(vm.envBytes("GOVERNOR").length == 20) {
+            governor = vm.envAddress("GOVERNOR");
+        } else {
+            governor = deployer;    
+        }
+
         string memory deploymentMode = vm.envOr("DEPLOYMENT_MODE", DEPLOYMENT_MODE_COMPLETE);
         require(
             deploymentMode.eq(DEPLOYMENT_MODE_COMPLETE) || deploymentMode.eq(DEPLOYMENT_MODE_BOLD_ONLY)
@@ -298,6 +316,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         _log("Deployer:               ", deployer.toHexString());
         _log("Deployer balance:       ", deployer.balance.decimal());
+        _log("Governor:               ", governor.toHexString());
         _log("Deployment mode:        ", deploymentMode);
         _log("CREATE2 salt:           ", 'keccak256(bytes("', saltStr, '")) = ', uint256(SALT).toHexString());
         _log("Governance epoch start: ", epochStart.toString());
@@ -330,12 +349,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // mainnet
             WETH = IWETH(GNO_WETH_ADDRESS);
             USDC = IERC20Metadata(GNO_USDC_ADDRESS);
-            curveStableswapFactory = curveStableswapFactoryMainnet;
+            curveStableswapFactory = curveStableswapFactoryGnosis;
             uniV3Router = ISwapRouter(address(0)); //uniV3RouterMainnet;
             uniV3Quoter = IQuoterV2(address(0)); //uniV3QuoterMainnet;
             uniswapV3Factory = IUniswapV3Factory(address(0)); //uniswapV3FactoryMainnet;
             uniV3PositionManager = INonfungiblePositionManager(address(0)); //uniV3PositionManagerMainnet;
-            balancerFactory = balancerFactoryMainnet;
+            balancerFactory = balancerFactoryGnosis;
             lqty = LQTY_ADDRESS;
             stakingV1 = LQTY_STAKING_ADDRESS;
             lusd = LUSD_ADDRESS;
@@ -511,19 +530,19 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // );
         }
 
-        ICurveStableswapNGPool lusdCurvePool;
-        if (block.chainid == 100) {
-            lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
-        }
+        // ICurveStableswapNGPool lusdCurvePool;
+        // if (block.chainid == 100) {
+        //     lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
+        // }
 
-        // Governance
-        string memory governanceManifest = _deployAndVerifyGovernance(
-            deployGovernanceParams,
-            address(curveStableswapFactory),
-            address(deployed.usdcCurvePool),
-            address(lusdCurvePool)
-        );
-
+        // // Governance
+        // string memory governanceManifest = _deployAndVerifyGovernance(
+        //     deployGovernanceParams,
+        //     address(curveStableswapFactory),
+        //     address(deployed.usdcCurvePool),
+        //     address(lusdCurvePool)
+        // );
+        string memory governanceManifest = Strings.toHexString(governor);
         vm.stopBroadcast();
 
         vm.writeFile("deployment-manifest.json", _getManifestJson(deployed, governanceManifest));
@@ -751,17 +770,17 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         r.boldToken.setCollateralRegistry(address(r.collateralRegistry));
 
-        // exchange helpers
-        r.exchangeHelpers = new HybridCurveUniV3ExchangeHelpers(
-            USDC,
-            WETH,
-            r.usdcCurvePool,
-            OTHER_TOKEN_INDEX, // USDC Curve pool index
-            BOLD_TOKEN_INDEX, // BOLD Curve pool index
-            UNIV3_FEE_USDC_WETH,
-            UNIV3_FEE_WETH_COLL,
-            uniV3Quoter
-        );
+        // // exchange helpers
+        // r.exchangeHelpers = new HybridCurveUniV3ExchangeHelpers(
+        //     USDC,
+        //     WETH,
+        //     r.usdcCurvePool,
+        //     OTHER_TOKEN_INDEX, // USDC Curve pool index
+        //     BOLD_TOKEN_INDEX, // BOLD Curve pool index
+        //     UNIV3_FEE_USDC_WETH,
+        //     UNIV3_FEE_WETH_COLL,
+        //     uniV3Quoter
+        // );
     }
 
     function _deployAddressesRegistry(TroveManagerParams memory _troveManagerParams)
@@ -814,7 +833,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
         addresses.troveManager = _troveManagerAddress;
         addresses.troveNFT = vm.computeCreate2Address(
-            SALT, keccak256(getBytecode(type(TroveNFT).creationCode, address(contracts.addressesRegistry)))
+            SALT, keccak256(abi.encodePacked(type(TroveNFT).creationCode, abi.encode(address(contracts.addressesRegistry), address(governor))))
         );
         addresses.stabilityPool = vm.computeCreate2Address(
             SALT, keccak256(getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)))
@@ -861,7 +880,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         contracts.borrowerOperations = new BorrowerOperations{salt: SALT}(contracts.addressesRegistry);
         contracts.troveManager = new TroveManager{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry);
+        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry, governor);
         contracts.stabilityPool = new StabilityPool{salt: SALT}(contracts.addressesRegistry);
         contracts.activePool = new ActivePool{salt: SALT}(contracts.addressesRegistry);
         contracts.defaultPool = new DefaultPool{salt: SALT}(contracts.addressesRegistry);
@@ -887,9 +906,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             address(contracts.activePool)
         );
 
-        // deploy zappers TODO: Not possible until univ3 is on gnosis
-        // (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
-        //     _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
+        // deploy zappers
+        (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
+            _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
     }
 
     function _deployPriceFeed(address _collTokenAddress, address _borroweOperationsAddress)
@@ -900,19 +919,19 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // mainnet
             // ETH
             if (_collTokenAddress == address(WETH)) {
-                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
+                return new WETHPriceFeed(GNO_ETH_USD_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
             } 
             // RETH
-            if(_collTokenAddress == RETH_ADDRESS){
-            return new RETHPriceFeed(
-                ETH_ORACLE_ADDRESS,
-                RETH_ORACLE_ADDRESS,
-                RETH_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                RETH_ETH_STALENESS_THRESHOLD,
-                _borroweOperationsAddress
-            );
-            }
+            // if(_collTokenAddress == RETH_ADDRESS){
+            // return new RETHPriceFeed(
+            //     GNO_ETH_USD_ORACLE_ADDRESS,
+            //     RETH_ORACLE_ADDRESS,
+            //     RETH_ADDRESS,
+            //     ETH_USD_STALENESS_THRESHOLD,
+            //     RETH_ETH_STALENESS_THRESHOLD,
+            //     _borroweOperationsAddress
+            // );
+            // }
             if(_collTokenAddress == GNO_GNO_ADDRESS){
                 return new GNOPriceFeed(
                     GNO_GNO_USD_ORACLE_ADDRESS,
@@ -987,7 +1006,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         } else {
             wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
-        leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
+        // leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
     }
 
     function _deployHybridLeverageZapper(
@@ -1317,7 +1336,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 string.concat('"debtInFrontHelper":"', address(deployed.debtInFrontHelper).toHexString(), '",'),
                 string.concat('"exchangeHelpers":"', address(deployed.exchangeHelpers).toHexString(), '",'),
                 string.concat('"branches":[', branches.join(","), "],"),
-                string.concat('"governance":', _governanceManifest, "") // no comma
+                string.concat('"governance":"', _governanceManifest, '"') // no comma
             ),
             "}"
         );
