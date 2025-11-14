@@ -6,6 +6,7 @@ import "./BaseZapper.sol";
 import "../Dependencies/Constants.sol";
 import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {IWBTCWrapper} from "../Interfaces/IWBTCWrapper.sol";
+import {ITroveManager} from "../Interfaces/ITroveManager.sol";
 import {SafeTransferLib} from "solady/utils/SafeTransferLib.sol";
 
 contract WBTCZapper is BaseZapper {
@@ -107,7 +108,7 @@ contract WBTCZapper is BaseZapper {
     }
 
     // @audit-info name is an artifact of the IZapper interface should be addCollWithRawWBTC but we have to call it this to use the BaseZapper
-    function addCollWithRawETH(uint256 _troveId, uint256 _amount) external payable {
+    function addCollWithRawETH(uint256 /* _troveId */, uint256 /* _amount */) external payable {
         revert("WBTCZapper: Not implemented");
     }
 
@@ -133,7 +134,7 @@ contract WBTCZapper is BaseZapper {
     }
 
     // @audit-info name is an artifact of the IZapper interface should be withdrawCollToRawWBTC but we have to call it this to use the BaseZapper
-    function withdrawCollToRawETH(uint256 _troveId, uint256 _amount) external {
+    function withdrawCollToRawETH(uint256 /* _troveId */, uint256 /* _amount */) external {
         revert("WBTCZapper: Not implemented");
     }
 
@@ -192,7 +193,7 @@ contract WBTCZapper is BaseZapper {
         _adjustTrovePost(_collChange, _isCollIncrease, _boldChange, _isDebtIncrease, receiver, initialBalances);
     }
 
-    function adjustTroveWithWBTC(
+    function adjustZombieTroveWithWBTC(
         uint256 _troveId,
         uint256 _collChange,
         bool _isCollIncrease,
@@ -224,10 +225,8 @@ contract WBTCZapper is BaseZapper {
             uint256 wbtcAmount = _collChange / 1e10;
             require(wbtcAmount > 0, "WBTCZapper: Amount too small");
             require(wbtcAmount <= wBTC.balanceOf(msg.sender), "WBTCZapper: Wrong coll amount");
-        } else {
-            require(_collChange == 0, "WBTCZapper: Not adding coll, no ETH should be received");
         }
-
+    
         address payable receiver =
             payable(_checkAdjustTroveManagers(_troveId, _collChange, _isCollIncrease, _isDebtIncrease));
 
@@ -379,4 +378,6 @@ contract WBTCZapper is BaseZapper {
         ILeverageZapper.LeverDownTroveParams calldata _params,
         uint256 _effectiveFlashLoanAmount
     ) external virtual override {}
+
+    receive() external payable {}
 }
