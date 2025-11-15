@@ -44,6 +44,10 @@ import {ERC20Faucet} from "./ERC20Faucet.sol";
 import "src/PriceFeeds/WETHPriceFeed.sol";
 import "src/PriceFeeds/WSTETHPriceFeed.sol";
 import "src/PriceFeeds/RETHPriceFeed.sol";
+import "src/Zappers/WBTCZapper.sol";
+import "src/Dependencies/WBTCWrapper.sol";
+
+import "src/Interfaces/IWBTC.sol";
 
 import "forge-std/console2.sol";
 
@@ -111,6 +115,7 @@ contract TestDeployer is MetadataDeployment {
 
     struct Zappers {
         WETHZapper wethZapper;
+        WBTCZapper wbtcZapper;
         GasCompZapper gasCompZapper;
         ILeverageZapper leverageZapperCurve;
         ILeverageZapper leverageZapperUniV3;
@@ -285,6 +290,98 @@ contract TestDeployer is MetadataDeployment {
         return "LST";
     }
 
+    function deployAndConnectContractsWithWBTC(
+        TroveManagerParams[] memory troveManagerParamsArray,
+        IWETH _WETH,
+        address _wbtcAddress
+    )
+        public
+        returns (
+            LiquityContractsDev[] memory contractsArray,
+            ICollateralRegistry collateralRegistry,
+            IBoldToken boldToken,
+            HintHelpers hintHelpers,
+            MultiTroveGetter multiTroveGetter,
+            Zappers[] memory zappersArray,
+            WBTCWrapper wbtcWrapper
+        )
+    {
+        require(_wbtcAddress != address(0), "WBTC address required");
+        DeploymentVarsDev memory vars;
+        vars.numCollaterals = troveManagerParamsArray.length;
+        require(vars.numCollaterals >= 2, "Need at least 2 branches for WBTC");
+        
+        // Deploy Bold
+        vars.bytecode = abi.encodePacked(type(BoldToken).creationCode, abi.encode(address(this)));
+        vars.boldTokenAddress = getAddress(address(this), vars.bytecode, SALT);
+        boldToken = new BoldToken{salt: SALT}(address(this));
+        assert(address(boldToken) == vars.boldTokenAddress);
+
+        contractsArray = new LiquityContractsDev[](vars.numCollaterals);
+        zappersArray = new Zappers[](vars.numCollaterals);
+        vars.collaterals = new IERC20Metadata[](vars.numCollaterals);
+        vars.addressesRegistries = new IAddressesRegistry[](vars.numCollaterals);
+        vars.troveManagers = new ITroveManager[](vars.numCollaterals);
+        // Deploy the first branch with WETH collateral
+        vars.collaterals[0] = _WETH;
+        (IAddressesRegistry addressesRegistry, address troveManagerAddress) =
+            _deployAddressesRegistryDev(troveManagerParamsArray[0]);
+        vars.addressesRegistries[0] = addressesRegistry;
+        vars.troveManagers[0] = ITroveManager(troveManagerAddress);
+
+        // Deploy WBTC wrapper for branch index 1
+        wbtcWrapper = new WBTCWrapper(_wbtcAddress);
+        vars.collaterals[1] = wbtcWrapper;
+        (addressesRegistry, troveManagerAddress) = _deployAddressesRegistryDev(troveManagerParamsArray[1]);
+        vars.addressesRegistries[1] = addressesRegistry;
+        vars.troveManagers[1] = ITroveManager(troveManagerAddress);
+
+        // Deploy remaining branches with regular ERC20Faucet tokens
+        for (vars.i = 2; vars.i < vars.numCollaterals; vars.i++) {
+            IERC20Metadata collToken = new ERC20Faucet(
+                _nameToken(vars.i), // _name
+                _symboltoken(vars.i), // _symbol
+                100 ether, //     _tapAmount
+                1 days //         _tapPeriod
+            );
+            vars.collaterals[vars.i] = collToken;
+            // Addresses registry and TM address
+            (addressesRegistry, troveManagerAddress) = _deployAddressesRegistryDev(troveManagerParamsArray[vars.i]);
+            vars.addressesRegistries[vars.i] = addressesRegistry;
+            vars.troveManagers[vars.i] = ITroveManager(troveManagerAddress);
+        }
+
+        collateralRegistry = new CollateralRegistry(boldToken, vars.collaterals, vars.troveManagers);
+        hintHelpers = new HintHelpers(collateralRegistry);
+        multiTroveGetter = new MultiTroveGetter(collateralRegistry);
+        (contractsArray[0], zappersArray[0]) = _deployAndConnectCollateralContractsDev(
+            _WETH,
+            boldToken,
+            collateralRegistry,
+            _WETH,
+            vars.addressesRegistries[0],
+            address(vars.troveManagers[0]),
+            hintHelpers,
+            multiTroveGetter
+        );
+
+        // Deploy the remaining branches
+        for (vars.i = 1; vars.i < vars.numCollaterals; vars.i++) {
+            (contractsArray[vars.i], zappersArray[vars.i]) = _deployAndConnectCollateralContractsDev(
+                vars.collaterals[vars.i],
+                boldToken,
+                collateralRegistry,
+                _WETH,
+                vars.addressesRegistries[vars.i],
+                address(vars.troveManagers[vars.i]),
+                hintHelpers,
+                multiTroveGetter
+            );
+        }
+
+        boldToken.setCollateralRegistry(address(collateralRegistry));
+    }
+
     function deployAndConnectContracts(TroveManagerParams[] memory troveManagerParamsArray, IWETH _WETH)
         public
         returns (
@@ -406,7 +503,7 @@ contract TestDeployer is MetadataDeployment {
             address(this), getBytecode(type(MetadataNFT).creationCode, address(initializedFixedAssetReader)), SALT
         );
         assert(address(metadataNFT) == addresses.metadataNFT);
-
+        
         // Pre-calc addresses
         addresses.borrowerOperations = getAddress(
             address(this),
@@ -415,7 +512,9 @@ contract TestDeployer is MetadataDeployment {
         );
         addresses.troveManager = _troveManagerAddress;
         addresses.troveNFT = getAddress(
-            address(this), getBytecode(type(TroveNFT).creationCode, address(contracts.addressesRegistry)), SALT
+            address(this),
+            abi.encodePacked(type(TroveNFT).creationCode, abi.encode(address(contracts.addressesRegistry), address(msg.sender))),
+            SALT
         );
         addresses.stabilityPool = getAddress(
             address(this), getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)), SALT
@@ -461,7 +560,7 @@ contract TestDeployer is MetadataDeployment {
 
         contracts.borrowerOperations = new BorrowerOperationsTester{salt: SALT}(contracts.addressesRegistry);
         contracts.troveManager = new TroveManagerTester{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry);
+        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry, address(msg.sender));
         contracts.stabilityPool = new StabilityPool{salt: SALT}(contracts.addressesRegistry);
         contracts.activePool = new ActivePool{salt: SALT}(contracts.addressesRegistry);
         contracts.pools.defaultPool = new DefaultPool{salt: SALT}(contracts.addressesRegistry);
@@ -626,8 +725,8 @@ contract TestDeployer is MetadataDeployment {
             SALT
         );
         addresses.troveManager = _params.troveManagerAddress;
-        addresses.troveNFT = getAddress(
-            address(this), getBytecode(type(TroveNFT).creationCode, address(contracts.addressesRegistry)), SALT
+        addresses.troveNFT = vm.computeCreate2Address(
+            SALT, keccak256(abi.encodePacked(type(TroveNFT).creationCode, abi.encode(address(contracts.addressesRegistry), address(msg.sender))))
         );
         addresses.stabilityPool = getAddress(
             address(this), getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)), SALT
@@ -676,7 +775,7 @@ contract TestDeployer is MetadataDeployment {
 
         contracts.borrowerOperations = new BorrowerOperationsTester{salt: SALT}(contracts.addressesRegistry);
         contracts.troveManager = new TroveManager{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry);
+        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry, address(msg.sender));
         contracts.stabilityPool = new StabilityPool{salt: SALT}(contracts.addressesRegistry);
         contracts.activePool = new ActivePool{salt: SALT}(contracts.addressesRegistry);
         contracts.defaultPool = new DefaultPool{salt: SALT}(contracts.addressesRegistry);
@@ -726,7 +825,8 @@ contract TestDeployer is MetadataDeployment {
         // ETH
         if (_branch == 0) {
             return new WETHPriceFeed(
-                _externalAddresses.ETHOracle, _oracleParams.ethUsdStalenessThreshold, _borrowerOperationsAddress
+                // TODO: THIS IS A PATCH TO GET TESTS TO RUN WITH ETH/EUR PRICEFEED changes
+                _externalAddresses.ETHOracle, _externalAddresses.ETHOracle, _oracleParams.ethUsdStalenessThreshold, _oracleParams.ethUsdStalenessThreshold, _borrowerOperationsAddress
             );
         } else if (_branch == 1) {
             // RETH
@@ -767,7 +867,21 @@ contract TestDeployer is MetadataDeployment {
         // TODO: Deploy base zappers versions with Uni V3 exchange
         bool lst = _collToken != _weth;
         if (lst) {
-            zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, curveExchange);
+            // Detect ERC20Wrapper-style collateral (WBTC wrapper)
+            (bool ok, bytes memory ret) = address(_collToken).staticcall(
+                abi.encodeWithSignature("underlying()")
+            );
+            if (ok) {
+                address underlying = abi.decode(ret, (address));
+                require(IERC20Metadata(underlying).decimals() == 8, "WBTCZapper: Wrong decimals");
+                zappers.wbtcZapper = new WBTCZapper(
+                    _addressesRegistry, flashLoanProvider, curveExchange
+                );
+            } else {
+                zappers.gasCompZapper = new GasCompZapper(
+                    _addressesRegistry, flashLoanProvider, curveExchange
+                );
+            }
         } else {
             zappers.wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, curveExchange);
         }
