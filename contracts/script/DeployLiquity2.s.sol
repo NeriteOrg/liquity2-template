@@ -35,6 +35,7 @@ import "test/Utils/Logging.sol";
 import "test/Utils/StringEquality.sol";
 import "src/Zappers/WETHZapper.sol";
 import "src/Zappers/GasCompZapper.sol";
+import "src/Zappers/WBTCZapper.sol";
 import "src/Zappers/LeverageLSTZapper.sol";
 import "src/Zappers/LeverageWETHZapper.sol";
 import "src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol";
@@ -55,8 +56,25 @@ import {MockStakingV1} from "V2-gov/test/mocks/MockStakingV1.sol";
 
 import {DeployGovernance} from "./DeployGovernance.s.sol";
 
+import {GNOPriceFeed} from "src/PriceFeeds/GNOPriceFeed.sol";
+import {OSGNOPriceFeed} from "src/PriceFeeds/OSGNOPriceFeed.sol";
+import {SDAIPriceFeed} from "src/PriceFeeds/SDAIPriceFeed.sol";
+import {WBTCPriceFeed} from "src/PriceFeeds/WBTCPriceFeed.sol";
+import {WBTCWrapper} from "src/Dependencies/WBTCWrapper.sol";
+import {IWBTCZapper} from "src/Zappers/Interfaces/IWBTCZapper.sol";
+
+
 function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) {
     return block.timestamp / 1 weeks * 1 weeks;
+}
+
+// Mock WBTC for testnet deployment
+contract MockWBTC is ERC20Faucet {
+    constructor() ERC20Faucet("Wrapped Bitcoin", "WBTC", 100 ether, 1 days) {}
+    
+    function decimals() public pure override(ERC20) returns (uint8) {
+        return 8;
+    }
 }
 
 contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats, MetadataDeployment, Logging {
@@ -68,7 +86,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     string constant DEPLOYMENT_MODE_BOLD_ONLY = "bold-only";
     string constant DEPLOYMENT_MODE_USE_EXISTING_BOLD = "use-existing-bold";
 
-    uint256 constant NUM_BRANCHES = 3;
+    uint256 constant NUM_BRANCHES = 5;
 
     address WETH_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
@@ -77,6 +95,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // tapping disallowed
     IWETH WETH;
     IERC20Metadata USDC;
+    // TODO: UPDATE ALL ADDRESSES FOR GNOSIS denominated in EUR
     address WSTETH_ADDRESS = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
     address RETH_ADDRESS = 0xae78736Cd615f374D3085123A210448E74Fc6393;
     address ETH_ORACLE_ADDRESS = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
@@ -95,6 +114,44 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address internal stakingV1;
     address internal lusd;
 
+    // GNOSIS
+    address GNO_WETH_ADDRESS = 0x6A023CCd1ff6F2045C3309768eAd9E68F978f6e1;
+    address GNO_OSGNO_ADDRESS = 0xF490c80aAE5f2616d3e3BDa2483E30C4CB21d1A0;
+    address GNO_SDAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
+    address GNO_WBTC_ADDRESS = 0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252;
+    address GNO_GNO_ADDRESS = 0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb;
+    address GNO_DAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
+    address GNO_USDC_ADDRESS = 0xDDAfbb505ad214D7b80b1f830fcCc89B60fb7A83;
+
+    address GNO_WSTETH_ADDRESS = 0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6;
+    address GNO_RETH_ADDRESS = 0xc791240D1F2dEf5938E2031364Ff4ed887133C3d;
+
+    address SDAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
+    address WBTC_ADDRESS = 0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252;
+    address OSGNO_ADDRESS = 0xF490c80aAE5f2616d3e3BDa2483E30C4CB21d1A0;
+    address GNO_ADDRESS = 0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb;
+
+    address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
+
+    address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;// osGNO
+    address GNO_GNO_USD_ORACLE_ADDRESS = 0x1D296b93a9679AEE6e6C307AAC537cCf0b2cC77c; // api3
+    address GNO_EUR_USD_ORACLE_ADDRESS = 0xab70BCB260073d036d1660201e9d5405F5829b7a; // chainlink
+    address GNO_DAI_USD_ORACLE_ADDRESS = 0x85b6dD270538325A9E0140bd6052Da4ecc18A85c; // api3
+    address GNO_BTC_USD_ORACLE_ADDRESS = 0x6C1d7e76EF7304a40e8456ce883BC56d3dEA3F7d; // chainlink
+    address GNO_WBTC_USD_ORACLE_ADDRESS = 0x00288135bE38B83249F380e9b6b9a04c90EC39eE; // chainlink
+    address GNO_ETH_USD_ORACLE_ADDRESS = 0x5b0cf2b36a65a6BB085D501B971e4c102B9Cd473; // api3
+
+    uint256 GNO_GNO_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_OSGNO_GNO_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_EUR_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_DAI_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_BTC_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
+
+    address governor;
+
     // Curve
     ICurveStableswapNGFactory curveStableswapFactory;
     // https://docs.curve.fi/deployments/amm/#stableswap-ng
@@ -104,6 +161,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // Mainnet
     ICurveStableswapNGFactory constant curveStableswapFactoryMainnet =
         ICurveStableswapNGFactory(0x6A8cbed756804B16E05E741eDaBd5cB544AE21bf);
+
+    ICurveStableswapNGFactory constant curveStableswapFactoryGnosis =
+        ICurveStableswapNGFactory(0xbC0797015fcFc47d9C1856639CaE50D0e69FbEE8);
+        
     uint128 constant BOLD_TOKEN_INDEX = 0;
     uint128 constant OTHER_TOKEN_INDEX = 1;
 
@@ -130,7 +191,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
     // Balancer
-    IVault constant balancerVault = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
+    IVault constant balancerVault = IVault(0xbA1333333333a1BA1108E8412f11850A5C319bA9); //IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
     IWeightedPoolFactory balancerFactory;
     // Sepolia
     // https://docs.balancer.fi/reference/contracts/deployment-addresses/sepolia.html
@@ -140,6 +201,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // https://docs.balancer.fi/reference/contracts/deployment-addresses/mainnet.html
     IWeightedPoolFactory constant balancerFactoryMainnet =
         IWeightedPoolFactory(0x897888115Ada5773E02aA29F775430BFB5F34c51);
+    // Gnosis
+    IWeightedPoolFactory constant balancerFactoryGnosis =
+        IWeightedPoolFactory(0xAc27df81663d139072E615855eF9aB0Af3FBD281);
 
     bytes32 SALT;
     address deployer;
@@ -164,6 +228,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IERC20Metadata collToken;
         WETHZapper wethZapper;
         GasCompZapper gasCompZapper;
+        WBTCZapper wbtcZapper;
         ILeverageZapper leverageZapper;
     }
 
@@ -183,8 +248,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     }
 
     struct Zappers {
-        WETHZapper wethZapper;
         GasCompZapper gasCompZapper;
+        WETHZapper wethZapper;
+        WBTCZapper wbtcZapper;
+        ILeverageZapper leverageZapper;
     }
 
     struct TroveManagerParams {
@@ -225,6 +292,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         MultiTroveGetter multiTroveGetter;
         IDebtInFrontHelper debtInFrontHelper;
         IExchangeHelpers exchangeHelpers;
+        address wbtcWrapper;
     }
 
     function run() external {
@@ -242,6 +310,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             vm.startBroadcast(privateKey);
         }
 
+        if(vm.envBytes("GOVERNOR").length == 20) {
+            governor = vm.envAddress("GOVERNOR");
+        } else {
+            governor = deployer;    
+        }
+
         string memory deploymentMode = vm.envOr("DEPLOYMENT_MODE", DEPLOYMENT_MODE_COMPLETE);
         require(
             deploymentMode.eq(DEPLOYMENT_MODE_COMPLETE) || deploymentMode.eq(DEPLOYMENT_MODE_BOLD_ONLY)
@@ -251,13 +325,14 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         uint256 epochStart = vm.envOr(
             "EPOCH_START",
-            (block.chainid == 1 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
+            (block.chainid == 100 ? _latestUTCMidnightBetweenWednesdayAndThursday() : block.timestamp) - EPOCH_DURATION
         );
 
         useTestnetPriceFeeds = vm.envOr("USE_TESTNET_PRICEFEEDS", false);
 
         _log("Deployer:               ", deployer.toHexString());
         _log("Deployer balance:       ", deployer.balance.decimal());
+        _log("Governor:               ", governor.toHexString());
         _log("Deployment mode:        ", deploymentMode);
         _log("CREATE2 salt:           ", 'keccak256(bytes("', saltStr, '")) = ', uint256(SALT).toHexString());
         _log("Governance epoch start: ", epochStart.toString());
@@ -286,16 +361,16 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             return;
         }
 
-        if (block.chainid == 1) {
+        if (block.chainid == 100) {
             // mainnet
-            WETH = IWETH(WETH_ADDRESS);
-            USDC = IERC20Metadata(USDC_ADDRESS);
-            curveStableswapFactory = curveStableswapFactoryMainnet;
-            uniV3Router = uniV3RouterMainnet;
-            uniV3Quoter = uniV3QuoterMainnet;
-            uniswapV3Factory = uniswapV3FactoryMainnet;
-            uniV3PositionManager = uniV3PositionManagerMainnet;
-            balancerFactory = balancerFactoryMainnet;
+            WETH = IWETH(GNO_WETH_ADDRESS);
+            USDC = IERC20Metadata(GNO_USDC_ADDRESS);
+            curveStableswapFactory = curveStableswapFactoryGnosis;
+            uniV3Router = ISwapRouter(address(0)); //uniV3RouterMainnet;
+            uniV3Quoter = IQuoterV2(address(0)); //uniV3QuoterMainnet;
+            uniswapV3Factory = IUniswapV3Factory(address(0)); //uniswapV3FactoryMainnet;
+            uniV3PositionManager = INonfungiblePositionManager(address(0)); //uniV3PositionManagerMainnet;
+            balancerFactory = balancerFactoryGnosis;
             lqty = LQTY_ADDRESS;
             stakingV1 = LQTY_STAKING_ADDRESS;
             lusd = LUSD_ADDRESS;
@@ -326,35 +401,27 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         TroveManagerParams[] memory troveManagerParamsArray = new TroveManagerParams[](NUM_BRANCHES);
 
-        // WETH
-        troveManagerParamsArray[0] = TroveManagerParams({
-            CCR: CCR_WETH,
-            MCR: MCR_WETH,
-            SCR: SCR_WETH,
-            BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WETH,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WETH
-        });
 
-        // wstETH
-        troveManagerParamsArray[1] = TroveManagerParams({
-            CCR: CCR_SETH,
-            MCR: MCR_SETH,
-            SCR: SCR_SETH,
-            BCR: BCR_ALL,
-            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
-            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
-        });
+        // // wstETH
+        // troveManagerParamsArray[1] = TroveManagerParams({
+        //     CCR: CCR_SETH,
+        //     MCR: MCR_SETH,
+        //     SCR: SCR_SETH,
+        //     BCR: BCR_ALL,
+        //     LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_SETH,
+        //     LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_SETH
+        // });
 
-        // rETH (same as wstETH)
-        troveManagerParamsArray[2] = troveManagerParamsArray[1];
+        // // rETH (same as wstETH)
+        // troveManagerParamsArray[2] = troveManagerParamsArray[1];
 
-        string[] memory collNames = new string[](2);
-        string[] memory collSymbols = new string[](2);
-        collNames[0] = "Wrapped liquid staked Ether 2.0";
-        collSymbols[0] = "wstETH";
-        collNames[1] = "Rocket Pool ETH";
-        collSymbols[1] = "rETH";
+        // Names/symbols for branches 1..(NUM_BRANCHES-1). Branch 0 (WETH) is excluded.
+        string[] memory collNames = new string[](NUM_BRANCHES - 1);
+        string[] memory collSymbols = new string[](NUM_BRANCHES - 1);
+        // collNames[0] = "Wrapped liquid staked Ether 2.0";
+        // collSymbols[0] = "wstETH";
+        // collNames[1] = "Rocket Pool ETH";
+        // collSymbols[1] = "rETH";
 
         DeployGovernanceParams memory deployGovernanceParams = DeployGovernanceParams({
             epochStart: epochStart,
@@ -365,6 +432,73 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             lusd: lusd,
             bold: boldAddress
         });
+
+        // WETH
+        troveManagerParamsArray[0] = TroveManagerParams({
+            CCR: CCR_WETH,
+            MCR: MCR_WETH,
+            SCR: SCR_WETH,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_WETH,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_WETH
+        });
+
+        // GNO
+
+        uint256 LIQUIDATION_PENALTY_SP_GNO = 5 * _1pct;
+        uint256 LIQUIDATION_PENALTY_REDISTRIBUTION_GNO = 10 * _1pct;
+
+        troveManagerParamsArray[1] = TroveManagerParams({
+            CCR: CCR_GNO,
+            MCR: MCR_GNO,
+            SCR: SCR_GNO,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: LIQUIDATION_PENALTY_SP_GNO,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: LIQUIDATION_PENALTY_REDISTRIBUTION_GNO
+        });
+        // Branch 1 → index 0 in collNames/collSymbols
+        collNames[0] = "Gnosis";
+        collSymbols[0] = "GNO";
+
+        //SDAI
+        troveManagerParamsArray[2] = TroveManagerParams({
+            CCR: CCR_SDAI,
+            MCR: MCR_SDAI,
+            SCR: SCR_SDAI,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
+        });
+        // Branch 2 → index 1
+        collNames[1] = "Savings sDAI";
+        collSymbols[1] = "sDAI";
+
+        //WBTC
+        troveManagerParamsArray[3] = TroveManagerParams({
+            CCR: CCR_WBTC,
+            MCR: MCR_WBTC,
+            SCR: SCR_WBTC,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
+        });
+        // Branch 3 → index 2
+        collNames[2] = "Wrapped Bitcoin";
+        collSymbols[2] = "WBTC";
+
+        //OSGNO
+        troveManagerParamsArray[4] = TroveManagerParams({
+            CCR: CCR_OSGNO,
+            MCR: MCR_OSGNO,
+            SCR: SCR_OSGNO,
+            BCR: BCR_ALL,
+            LIQUIDATION_PENALTY_SP: 5 * _1pct,
+            LIQUIDATION_PENALTY_REDISTRIBUTION: 10 * _1pct
+        });
+        // Branch 4 → index 3
+        collNames[3] = "Osmosis GNO";
+        collSymbols[3] = "OSGNO";
+
 
         DeploymentResult memory deployed =
             _deployAndConnectContracts(troveManagerParamsArray, collNames, collSymbols, deployGovernanceParams);
@@ -399,13 +533,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // deployed.contractsArray[1].collToken.mint(deployer, 1 ether);
             // deployed.contractsArray[1].collToken.approve(address(deployed.contractsArray[1].leverageZapper), 1 ether);
-            // deployed.contractsArray[1].leverageZapper.openLeveragedTroveWithRawETH{value: ETH_GAS_COMPENSATION}(
-            //     ILeverageZapper.OpenLeveragedTroveParams({
-            //         owner: deployer,
-            //         ownerIndex: 1,
-            //         collAmount: 1 ether,
-            //         flashLoanAmount: 1 ether,
-            //         boldAmount: 2_000 ether,
+            // deployed.contractsArray[1].leverageZapper.openLeveragedTroveWithRawETH{value:  
             //         upperHint: 0,
             //         lowerHint: 0,
             //         annualInterestRate: MIN_ANNUAL_INTEREST_RATE,
@@ -418,21 +546,19 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // );
         }
 
-        ICurveStableswapNGPool lusdCurvePool;
-        if (block.chainid == 1) {
-            lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
-        }
+        // ICurveStableswapNGPool lusdCurvePool;
+        // if (block.chainid == 100) {
+        //     lusdCurvePool = _deployCurvePool(deployed.boldToken, IERC20Metadata(LUSD_ADDRESS));
+        // }
 
-        // Governance
-        (address governanceAddress, string memory governanceManifest) = deployGovernance(
-            deployGovernanceParams,
-            address(curveStableswapFactory),
-            address(deployed.usdcCurvePool),
-            address(lusdCurvePool)
-        );
-        address computedGovernanceAddress = computeGovernanceAddress(deployGovernanceParams);
-        assert(governanceAddress == computedGovernanceAddress);
-
+        // // Governance
+        // string memory governanceManifest = _deployAndVerifyGovernance(
+        //     deployGovernanceParams,
+        //     address(curveStableswapFactory),
+        //     address(deployed.usdcCurvePool),
+        //     address(lusdCurvePool)
+        // );
+        string memory governanceManifest = Strings.toHexString(governor);
         vm.stopBroadcast();
 
         vm.writeFile("deployment-manifest.json", _getManifestJson(deployed, governanceManifest));
@@ -485,6 +611,23 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             openDemoTroves(demoTroves, deployed.contractsArray);
         }
+    }
+
+    function _deployAndVerifyGovernance(
+        DeployGovernanceParams memory deployGovernanceParams,
+        address curveStableswapFactoryAddr,
+        address usdcCurvePoolAddr,
+        address lusdCurvePoolAddr
+    ) internal returns (string memory governanceManifest) {
+        (address governanceAddress, string memory manifest) = deployGovernance(
+            deployGovernanceParams,
+            curveStableswapFactoryAddr,
+            usdcCurvePoolAddr,
+            lusdCurvePoolAddr
+        );
+        address computedGovernanceAddress = computeGovernanceAddress(deployGovernanceParams);
+        assert(governanceAddress == computedGovernanceAddress);
+        return manifest;
     }
 
     function tapFaucet(uint256[] memory accounts, LiquityContracts memory contracts) internal {
@@ -574,16 +717,30 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         vars.troveManagers = new ITroveManager[](vars.numCollaterals);
 
         // Collaterals
-        if (block.chainid == 1 && !useTestnetPriceFeeds) {
+        if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
             // ETH
             vars.collaterals[0] = IERC20Metadata(WETH);
 
-            // wstETH
-            vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
+            // // wstETH
+            // vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
 
-            // RETH
-            vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
+            // // RETH
+            // vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
+
+            // GNO
+            vars.collaterals[1] = IERC20Metadata(GNO_ADDRESS);
+
+            // sDAI
+            vars.collaterals[2] = IERC20Metadata(SDAI_ADDRESS);
+
+            // WBTC - deploy wrapper
+            WBTCWrapper wbtcWrapper = new WBTCWrapper(GNO_WBTC_ADDRESS);
+            r.wbtcWrapper = address(wbtcWrapper);
+            vars.collaterals[3] = IERC20Metadata(r.wbtcWrapper);
+
+            // OSGNO
+            vars.collaterals[4] = IERC20Metadata(OSGNO_ADDRESS);
         } else {
             // Sepolia
             // Use WETH as collateral for the first branch
@@ -591,12 +748,21 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // Deploy plain ERC20Faucets for the rest of the branches
             for (vars.i = 1; vars.i < vars.numCollaterals; vars.i++) {
-                vars.collaterals[vars.i] = new ERC20Faucet(
-                    _collNames[vars.i - 1], //   _name
-                    _collSymbols[vars.i - 1], // _symbol
-                    100 ether, //     _tapAmount
-                    1 days //         _tapPeriod
-                );
+                // Branch 3 (index 3) is WBTC - deploy wrapper
+                if (vars.i == 3) {
+                    // Deploy mock WBTC for testing (8 decimals)
+                    MockWBTC mockWBTC = new MockWBTC();
+                    WBTCWrapper wbtcWrapper = new WBTCWrapper(address(mockWBTC));
+                    r.wbtcWrapper = address(wbtcWrapper);
+                    vars.collaterals[vars.i] = IERC20Metadata(r.wbtcWrapper);
+                } else {
+                    vars.collaterals[vars.i] = new ERC20Faucet(
+                        _collNames[vars.i - 1], //   _name
+                        _collSymbols[vars.i - 1], // _symbol
+                        100 ether, //     _tapAmount
+                        1 days //         _tapPeriod
+                    );
+                }
             }
         }
 
@@ -631,17 +797,17 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         r.boldToken.setCollateralRegistry(address(r.collateralRegistry));
 
-        // exchange helpers
-        r.exchangeHelpers = new HybridCurveUniV3ExchangeHelpers(
-            USDC,
-            WETH,
-            r.usdcCurvePool,
-            OTHER_TOKEN_INDEX, // USDC Curve pool index
-            BOLD_TOKEN_INDEX, // BOLD Curve pool index
-            UNIV3_FEE_USDC_WETH,
-            UNIV3_FEE_WETH_COLL,
-            uniV3Quoter
-        );
+        // // exchange helpers
+        // r.exchangeHelpers = new HybridCurveUniV3ExchangeHelpers(
+        //     USDC,
+        //     WETH,
+        //     r.usdcCurvePool,
+        //     OTHER_TOKEN_INDEX, // USDC Curve pool index
+        //     BOLD_TOKEN_INDEX, // BOLD Curve pool index
+        //     UNIV3_FEE_USDC_WETH,
+        //     UNIV3_FEE_WETH_COLL,
+        //     uniV3Quoter
+        // );
     }
 
     function _deployAddressesRegistry(TroveManagerParams memory _troveManagerParams)
@@ -694,7 +860,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
         addresses.troveManager = _troveManagerAddress;
         addresses.troveNFT = vm.computeCreate2Address(
-            SALT, keccak256(getBytecode(type(TroveNFT).creationCode, address(contracts.addressesRegistry)))
+            SALT, keccak256(abi.encodePacked(type(TroveNFT).creationCode, abi.encode(address(contracts.addressesRegistry), address(governor))))
         );
         addresses.stabilityPool = vm.computeCreate2Address(
             SALT, keccak256(getBytecode(type(StabilityPool).creationCode, address(contracts.addressesRegistry)))
@@ -741,7 +907,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         contracts.borrowerOperations = new BorrowerOperations{salt: SALT}(contracts.addressesRegistry);
         contracts.troveManager = new TroveManager{salt: SALT}(contracts.addressesRegistry);
-        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry);
+        contracts.troveNFT = new TroveNFT{salt: SALT}(contracts.addressesRegistry, governor);
         contracts.stabilityPool = new StabilityPool{salt: SALT}(contracts.addressesRegistry);
         contracts.activePool = new ActivePool{salt: SALT}(contracts.addressesRegistry);
         contracts.defaultPool = new DefaultPool{salt: SALT}(contracts.addressesRegistry);
@@ -767,53 +933,106 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             address(contracts.activePool)
         );
 
+        Zappers memory zappers = _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
         // deploy zappers
-        (contracts.gasCompZapper, contracts.wethZapper, contracts.leverageZapper) =
-            _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
+        contracts.gasCompZapper = zappers.gasCompZapper;
+        contracts.wethZapper = zappers.wethZapper;
+        contracts.wbtcZapper = zappers.wbtcZapper;
+        contracts.leverageZapper = zappers.leverageZapper;
+    }
+
+    function _isWBTCWrapper(address _token) internal view returns (bool) {
+        (bool hasUnderlying, bytes memory underlyingRet) = _token.staticcall(
+            abi.encodeWithSignature("underlying()")
+        );
+        if (!hasUnderlying) return false;
+        
+        address underlying = abi.decode(underlyingRet, (address));
+        (bool hasDecimals, bytes memory decimalsRet) = underlying.staticcall(
+            abi.encodeWithSignature("decimals()")
+        );
+        if (!hasDecimals) return false;
+        
+        uint8 decimals = abi.decode(decimalsRet, (uint8));
+        return decimals == 8;
     }
 
     function _deployPriceFeed(address _collTokenAddress, address _borroweOperationsAddress)
         internal
         returns (IPriceFeed)
     {
-        if (block.chainid == 1 && !useTestnetPriceFeeds) {
+        if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
             // ETH
             if (_collTokenAddress == address(WETH)) {
-                return new WETHPriceFeed(ETH_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
-            } else if (_collTokenAddress == WSTETH_ADDRESS) {
-                // wstETH
-                return new WSTETHPriceFeed(
-                    ETH_ORACLE_ADDRESS,
-                    STETH_ORACLE_ADDRESS,
-                    WSTETH_ADDRESS,
-                    ETH_USD_STALENESS_THRESHOLD,
-                    STETH_USD_STALENESS_THRESHOLD,
+                return new WETHPriceFeed(GNO_ETH_USD_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
+            } 
+            // RETH
+            // if(_collTokenAddress == RETH_ADDRESS){
+            // return new RETHPriceFeed(
+            //     GNO_ETH_USD_ORACLE_ADDRESS,
+            //     RETH_ORACLE_ADDRESS,
+            //     RETH_ADDRESS,
+            //     ETH_USD_STALENESS_THRESHOLD,
+            //     RETH_ETH_STALENESS_THRESHOLD,
+            //     _borroweOperationsAddress
+            // );
+            // }
+            if(_collTokenAddress == GNO_GNO_ADDRESS){
+                return new GNOPriceFeed(
+                    GNO_GNO_USD_ORACLE_ADDRESS,
+                    GNO_EUR_USD_ORACLE_ADDRESS,
+                    GNO_GNO_USD_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
                     _borroweOperationsAddress
                 );
             }
-            // RETH
-            assert(_collTokenAddress == RETH_ADDRESS);
-            return new RETHPriceFeed(
-                ETH_ORACLE_ADDRESS,
-                RETH_ORACLE_ADDRESS,
-                RETH_ADDRESS,
-                ETH_USD_STALENESS_THRESHOLD,
-                RETH_ETH_STALENESS_THRESHOLD,
-                _borroweOperationsAddress
-            );
+            if(_collTokenAddress == GNO_SDAI_ADDRESS){
+                return new SDAIPriceFeed(
+                    GNO_DAI_USD_ORACLE_ADDRESS,
+                    GNO_EUR_USD_ORACLE_ADDRESS,
+                    GNO_DAI_USD_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress,
+                    GNO_SDAI_ADDRESS
+                );
+            }
+            // Detect WBTC wrapper by checking if it has underlying() with 8 decimals
+            if (_isWBTCWrapper(_collTokenAddress)) {
+                return new WBTCPriceFeed(
+                    GNO_WBTC_USD_ORACLE_ADDRESS,
+                    GNO_BTC_USD_ORACLE_ADDRESS,
+                    GNO_EUR_USD_ORACLE_ADDRESS,
+                    GNO_WBTC_USD_STALENESS_THRESHOLD,
+                    GNO_BTC_USD_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
+            if(_collTokenAddress == GNO_OSGNO_ADDRESS){
+                return new OSGNOPriceFeed(
+                    GNO_OSGNO_GNO_ORACLE_ADDRESS,
+                    GNO_GNO_USD_ORACLE_ADDRESS,
+                    GNO_EUR_USD_ORACLE_ADDRESS,
+                    GNO_OSGNO_GNO_STALENESS_THRESHOLD,
+                    GNO_GNO_USD_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
+                    _borroweOperationsAddress
+                );
+            }
         }
 
         // Sepolia
         return new PriceFeedTestnet();
     }
 
+
     function _deployZappers(
         IAddressesRegistry _addressesRegistry,
         IERC20 _collToken,
         IBoldToken _boldToken,
         ICurveStableswapNGPool _usdcCurvePool
-    ) internal returns (GasCompZapper gasCompZapper, WETHZapper wethZapper, ILeverageZapper leverageZapper) {
+    ) internal returns (Zappers memory zappers) {
         IFlashLoanProvider flashLoanProvider = new BalancerFlashLoan();
 
         IExchange hybridExchange = new HybridCurveUniV3Exchange(
@@ -831,11 +1050,33 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
         bool lst = _collToken != WETH;
         if (lst) {
-            gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            // Detect ERC20Wrapper-style collateral (WBTC wrapper)
+            (bool ok, bytes memory ret) = address(_collToken).staticcall(
+                abi.encodeWithSignature("underlying()")
+            );
+            if (ok) {
+                address underlying = abi.decode(ret, (address));
+                // Check if underlying has 8 decimals (WBTC)
+                (bool decimalsOk, bytes memory decimalsRet) = underlying.staticcall(
+                    abi.encodeWithSignature("decimals()")
+                );
+                if (decimalsOk) {
+                    uint8 decimals = abi.decode(decimalsRet, (uint8));
+                    if (decimals == 8) {
+                        zappers.wbtcZapper = new WBTCZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                    } else {
+                        zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                    }
+                } else {
+                    zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                }
+            } else {
+                zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            }
         } else {
-            wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            zappers.wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
-        leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
+        // leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
     }
 
     function _deployHybridLeverageZapper(
@@ -1119,6 +1360,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 ),
                 string.concat(
                     string.concat('"gasCompZapper":"', address(c.gasCompZapper).toHexString(), '",'),
+                    string.concat('"wbtcZapper":"', address(c.wbtcZapper).toHexString(), '",'),
                     string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '"') // no comma
                 )
             ),
@@ -1142,6 +1384,17 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
     }
 
+    function _getCoreAddressesJson(DeploymentResult memory deployed) internal pure returns (string memory) {
+        return string.concat(
+            string.concat('"collateralRegistry":"', address(deployed.collateralRegistry).toHexString(), '",'),
+            string.concat('"boldToken":"', address(deployed.boldToken).toHexString(), '",'),
+            string.concat('"hintHelpers":"', address(deployed.hintHelpers).toHexString(), '",'),
+            string.concat('"multiTroveGetter":"', address(deployed.multiTroveGetter).toHexString(), '",'),
+            string.concat('"debtInFrontHelper":"', address(deployed.debtInFrontHelper).toHexString(), '",'),
+            string.concat('"exchangeHelpers":"', address(deployed.exchangeHelpers).toHexString(), '",')
+        );
+    }
+
     function _getManifestJson(DeploymentResult memory deployed, string memory _governanceManifest)
         internal
         view
@@ -1158,14 +1411,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             "{",
             string.concat(
                 string.concat('"constants":', _getDeploymentConstants(), ","),
-                string.concat('"collateralRegistry":"', address(deployed.collateralRegistry).toHexString(), '",'),
-                string.concat('"boldToken":"', address(deployed.boldToken).toHexString(), '",'),
-                string.concat('"hintHelpers":"', address(deployed.hintHelpers).toHexString(), '",'),
-                string.concat('"multiTroveGetter":"', address(deployed.multiTroveGetter).toHexString(), '",'),
-                string.concat('"debtInFrontHelper":"', address(deployed.debtInFrontHelper).toHexString(), '",'),
-                string.concat('"exchangeHelpers":"', address(deployed.exchangeHelpers).toHexString(), '",'),
+                _getCoreAddressesJson(deployed),
                 string.concat('"branches":[', branches.join(","), "],"),
-                string.concat('"governance":', _governanceManifest, "") // no comma
+                string.concat('"governance":"', _governanceManifest, '",'),
+                string.concat('"wbtcWrapper":"', deployed.wbtcWrapper.toHexString(), '"')
             ),
             "}"
         );

@@ -9,8 +9,8 @@ uint256 constant DECIMAL_PRECISION = 1e18;
 uint256 constant _100pct = DECIMAL_PRECISION;
 uint256 constant _1pct = DECIMAL_PRECISION / 100;
 
-// Amount of ETH to be locked in gas pool on opening troves
-uint256 constant ETH_GAS_COMPENSATION = 0.0375 ether;
+// Amount of xDAI to be locked in gas pool on opening troves
+uint256 constant ETH_GAS_COMPENSATION = 1 ether;
 
 // Liquidation
 uint256 constant MIN_LIQUIDATION_PENALTY_SP = 5e16; // 5%
@@ -18,13 +18,28 @@ uint256 constant MAX_LIQUIDATION_PENALTY_REDISTRIBUTION = 20e16; // 20%
 
 // Collateral branch parameters (SETH = staked ETH, i.e. wstETH / rETH)
 uint256 constant CCR_WETH = 150 * _1pct;
-uint256 constant CCR_SETH = 160 * _1pct;
-
 uint256 constant MCR_WETH = 110 * _1pct;
-uint256 constant MCR_SETH = 120 * _1pct;
-
 uint256 constant SCR_WETH = 110 * _1pct;
-uint256 constant SCR_SETH = 120 * _1pct;
+
+uint256 constant CCR_SETH = 160 * _1pct;
+uint256 constant MCR_SETH = 130 * _1pct;
+uint256 constant SCR_SETH = 115 * _1pct;
+
+uint256 constant CCR_GNO = 165 * _1pct;
+uint256 constant MCR_GNO = 140 * _1pct;
+uint256 constant SCR_GNO = 115 * _1pct;
+
+uint256 constant CCR_SDAI = 160 * _1pct;
+uint256 constant MCR_SDAI = 130 * _1pct;
+uint256 constant SCR_SDAI = 115 * _1pct;
+
+uint256 constant CCR_WBTC = 150 * _1pct;
+uint256 constant MCR_WBTC = 115 * _1pct;
+uint256 constant SCR_WBTC = 110 * _1pct;
+
+uint256 constant CCR_OSGNO = 165 * _1pct;
+uint256 constant MCR_OSGNO = 140 * _1pct;
+uint256 constant SCR_OSGNO = 115 * _1pct;
 
 // Batch CR buffer (same for all branches for now)
 // On top of MCR to join a batch, or adjust inside a batch
@@ -38,10 +53,10 @@ uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_SETH = 20 * _1pct;
 
 // Fraction of collateral awarded to liquidator
 uint256 constant COLL_GAS_COMPENSATION_DIVISOR = 200; // dividing by 200 yields 0.5%
-uint256 constant COLL_GAS_COMPENSATION_CAP = 2 ether; // Max coll gas compensation capped at 2 ETH
+uint256 constant COLL_GAS_COMPENSATION_CAP = 10 ether; // Max coll gas compensation capped at 10 xDAI
 
 // Minimum amount of net Bold debt a trove must have
-uint256 constant MIN_DEBT = 2000e18;
+uint256 constant MIN_DEBT = 500e18;
 
 uint256 constant MIN_ANNUAL_INTEREST_RATE = _1pct / 2; // 0.5%
 uint256 constant MAX_ANNUAL_INTEREST_RATE = 250 * _1pct;

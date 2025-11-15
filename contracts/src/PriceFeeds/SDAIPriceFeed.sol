@@ -4,14 +4,20 @@ pragma solidity 0.8.24;
 
 import "./MainnetPriceFeedBase.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 // import "forge-std/console2.sol";
 
 contract SDAIPriceFeed is MainnetPriceFeedBase {
     IERC4626 public immutable sdai;
+    Oracle public eurUsdOracle;
 
-    constructor(address _sdaiUsdOracleAddress, uint256 _sdaiUsdStalenessThreshold, address _borrowerOperationsAddress, address _sdaiAddress)
-        MainnetPriceFeedBase(_sdaiUsdOracleAddress, _sdaiUsdStalenessThreshold, _borrowerOperationsAddress)
+    constructor(address _daiUsdOracleAddress, address _eurUsdOracleAddress, uint256 _daiUsdStalenessThreshold, uint256 _usdEurStalenessThreshold, address _borrowerOperationsAddress, address _sdaiAddress)
+        MainnetPriceFeedBase(_daiUsdOracleAddress, _daiUsdStalenessThreshold, _borrowerOperationsAddress)
     {
+        eurUsdOracle.aggregator = AggregatorV3Interface(_eurUsdOracleAddress);
+        eurUsdOracle.stalenessThreshold = _usdEurStalenessThreshold;
+        eurUsdOracle.decimals = eurUsdOracle.aggregator.decimals();
+
         sdai = IERC4626(_sdaiAddress);
     }
 
@@ -35,18 +41,20 @@ contract SDAIPriceFeed is MainnetPriceFeedBase {
     function _fetchPricePrimary() internal returns (uint256, bool) {
         assert(priceSource == PriceSource.primary);
         
-        (uint256 daiEurPrice, bool daiEurOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 daiUSDPrice, bool daiEurOracleDown) = _getOracleAnswer(ethUsdOracle);
+        (uint256 eurUsdPrice, bool eurUsdOracleDown) = _getOracleAnswer(eurUsdOracle);
 
         // Get the DAI rate of the SDAI vault
         uint256 sdaiDaiRate = sdai.convertToAssets(1e18);
 
         // If the DAI-EUR Chainlink response was invalid in this transaction, return the last good ETH-USD price calculated
         if (daiEurOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
-        if (sdaiDaiRate == 0) return (_shutDownAndSwitchToLastGoodPrice(address(ethUsdOracle.aggregator)), true);
+        if (sdaiDaiRate == 0) return (_shutDownAndSwitchToLastGoodPrice(address(sdai)), true);
+        if (eurUsdOracleDown) return (_shutDownAndSwitchToLastGoodPrice(address(eurUsdOracle.aggregator)), true);
         
-        uint256 sdaiEurPrice = daiEurPrice * sdaiDaiRate / 1e18;
-        lastGoodPrice = sdaiEurPrice;
+        uint256 sdaiUSDPrice = FixedPointMathLib.mulWadUp(daiUSDPrice, sdaiDaiRate);
+        lastGoodPrice = FixedPointMathLib.divWad(sdaiUSDPrice, eurUsdPrice);
 
-        return (sdaiEurPrice, false);
+        return (lastGoodPrice, false);
     }
 }
