@@ -61,7 +61,7 @@ import {OSGNOPriceFeed} from "src/PriceFeeds/OSGNOPriceFeed.sol";
 import {SDAIPriceFeed} from "src/PriceFeeds/SDAIPriceFeed.sol";
 import {WBTCPriceFeed} from "src/PriceFeeds/WBTCPriceFeed.sol";
 import {WBTCWrapper} from "src/Dependencies/WBTCWrapper.sol";
-import {IWBTCZapper} from "src/Interfaces/IWBTCZapper.sol";
+import {IWBTCZapper} from "src/Zappers/Interfaces/IWBTCZapper.sol";
 
 
 function _latestUTCMidnightBetweenWednesdayAndThursday() view returns (uint256) {
@@ -150,8 +150,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
 
-    address GNO_WBTC_WRAPPER_ADDRESS = 0x0000000000000000000000000000000000000000;
-
     address governor;
 
     // Curve
@@ -230,7 +228,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         IERC20Metadata collToken;
         WETHZapper wethZapper;
         GasCompZapper gasCompZapper;
-        IWBTCZapper wbtcZapper;
+        WBTCZapper wbtcZapper;
         ILeverageZapper leverageZapper;
     }
 
@@ -250,8 +248,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     }
 
     struct Zappers {
-        WETHZapper wethZapper;
         GasCompZapper gasCompZapper;
+        WETHZapper wethZapper;
+        WBTCZapper wbtcZapper;
+        ILeverageZapper leverageZapper;
     }
 
     struct TroveManagerParams {
@@ -292,6 +292,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         MultiTroveGetter multiTroveGetter;
         IDebtInFrontHelper debtInFrontHelper;
         IExchangeHelpers exchangeHelpers;
+        address wbtcWrapper;
     }
 
     function run() external {
@@ -735,8 +736,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
             // WBTC - deploy wrapper
             WBTCWrapper wbtcWrapper = new WBTCWrapper(GNO_WBTC_ADDRESS);
-            GNO_WBTC_WRAPPER_ADDRESS = address(wbtcWrapper);
-            vars.collaterals[3] = IERC20Metadata(GNO_WBTC_WRAPPER_ADDRESS);
+            r.wbtcWrapper = address(wbtcWrapper);
+            vars.collaterals[3] = IERC20Metadata(r.wbtcWrapper);
 
             // OSGNO
             vars.collaterals[4] = IERC20Metadata(OSGNO_ADDRESS);
@@ -752,7 +753,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     // Deploy mock WBTC for testing (8 decimals)
                     MockWBTC mockWBTC = new MockWBTC();
                     WBTCWrapper wbtcWrapper = new WBTCWrapper(address(mockWBTC));
-                    vars.collaterals[vars.i] = IERC20Metadata(address(wbtcWrapper));
+                    r.wbtcWrapper = address(wbtcWrapper);
+                    vars.collaterals[vars.i] = IERC20Metadata(r.wbtcWrapper);
                 } else {
                     vars.collaterals[vars.i] = new ERC20Faucet(
                         _collNames[vars.i - 1], //   _name
@@ -931,9 +933,28 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             address(contracts.activePool)
         );
 
+        Zappers memory zappers = _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
         // deploy zappers
-        (contracts.gasCompZapper, contracts.wethZapper, contracts.wbtcZapper, contracts.leverageZapper) =
-            _deployZappers(contracts.addressesRegistry, contracts.collToken, _boldToken, _usdcCurvePool);
+        contracts.gasCompZapper = zappers.gasCompZapper;
+        contracts.wethZapper = zappers.wethZapper;
+        contracts.wbtcZapper = zappers.wbtcZapper;
+        contracts.leverageZapper = zappers.leverageZapper;
+    }
+
+    function _isWBTCWrapper(address _token) internal view returns (bool) {
+        (bool hasUnderlying, bytes memory underlyingRet) = _token.staticcall(
+            abi.encodeWithSignature("underlying()")
+        );
+        if (!hasUnderlying) return false;
+        
+        address underlying = abi.decode(underlyingRet, (address));
+        (bool hasDecimals, bytes memory decimalsRet) = underlying.staticcall(
+            abi.encodeWithSignature("decimals()")
+        );
+        if (!hasDecimals) return false;
+        
+        uint8 decimals = abi.decode(decimalsRet, (uint8));
+        return decimals == 8;
     }
 
     function _deployPriceFeed(address _collTokenAddress, address _borroweOperationsAddress)
@@ -976,7 +997,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     GNO_SDAI_ADDRESS
                 );
             }
-            if(_collTokenAddress == GNO_WBTC_WRAPPER_ADDRESS){
+            // Detect WBTC wrapper by checking if it has underlying() with 8 decimals
+            if (_isWBTCWrapper(_collTokenAddress)) {
                 return new WBTCPriceFeed(
                     GNO_WBTC_USD_ORACLE_ADDRESS,
                     GNO_BTC_USD_ORACLE_ADDRESS,
@@ -1004,12 +1026,13 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         return new PriceFeedTestnet();
     }
 
+
     function _deployZappers(
         IAddressesRegistry _addressesRegistry,
         IERC20 _collToken,
         IBoldToken _boldToken,
         ICurveStableswapNGPool _usdcCurvePool
-    ) internal returns (GasCompZapper gasCompZapper, WETHZapper wethZapper, WBTCZapper wbtcZapper, ILeverageZapper leverageZapper) {
+    ) internal returns (Zappers memory zappers) {
         IFlashLoanProvider flashLoanProvider = new BalancerFlashLoan();
 
         IExchange hybridExchange = new HybridCurveUniV3Exchange(
@@ -1040,18 +1063,18 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 if (decimalsOk) {
                     uint8 decimals = abi.decode(decimalsRet, (uint8));
                     if (decimals == 8) {
-                        wbtcZapper = new WBTCZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                        zappers.wbtcZapper = new WBTCZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
                     } else {
-                        gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                        zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
                     }
                 } else {
-                    gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                    zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
                 }
             } else {
-                gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+                zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
             }
         } else {
-            wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
+            zappers.wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
         // leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
     }
@@ -1361,6 +1384,17 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         );
     }
 
+    function _getCoreAddressesJson(DeploymentResult memory deployed) internal pure returns (string memory) {
+        return string.concat(
+            string.concat('"collateralRegistry":"', address(deployed.collateralRegistry).toHexString(), '",'),
+            string.concat('"boldToken":"', address(deployed.boldToken).toHexString(), '",'),
+            string.concat('"hintHelpers":"', address(deployed.hintHelpers).toHexString(), '",'),
+            string.concat('"multiTroveGetter":"', address(deployed.multiTroveGetter).toHexString(), '",'),
+            string.concat('"debtInFrontHelper":"', address(deployed.debtInFrontHelper).toHexString(), '",'),
+            string.concat('"exchangeHelpers":"', address(deployed.exchangeHelpers).toHexString(), '",')
+        );
+    }
+
     function _getManifestJson(DeploymentResult memory deployed, string memory _governanceManifest)
         internal
         view
@@ -1377,14 +1411,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             "{",
             string.concat(
                 string.concat('"constants":', _getDeploymentConstants(), ","),
-                string.concat('"collateralRegistry":"', address(deployed.collateralRegistry).toHexString(), '",'),
-                string.concat('"boldToken":"', address(deployed.boldToken).toHexString(), '",'),
-                string.concat('"hintHelpers":"', address(deployed.hintHelpers).toHexString(), '",'),
-                string.concat('"multiTroveGetter":"', address(deployed.multiTroveGetter).toHexString(), '",'),
-                string.concat('"debtInFrontHelper":"', address(deployed.debtInFrontHelper).toHexString(), '",'),
-                string.concat('"exchangeHelpers":"', address(deployed.exchangeHelpers).toHexString(), '",'),
+                _getCoreAddressesJson(deployed),
                 string.concat('"branches":[', branches.join(","), "],"),
-                string.concat('"governance":"', _governanceManifest, '"') // no comma
+                string.concat('"governance":"', _governanceManifest, '",'),
+                string.concat('"wbtcWrapper":"', deployed.wbtcWrapper.toHexString(), '"')
             ),
             "}"
         );
