@@ -104,6 +104,7 @@ export function ActionCard({
 					gap: 16,
 					width: "100%",
 					padding: "20px 24px",
+					borderRadius: 8,
 					_groupFocusVisible: {
 						outline: "2px solid token(colors.focused)",
 						outlineOffset: 2,
