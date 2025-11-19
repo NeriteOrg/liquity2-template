@@ -225,35 +225,35 @@ export const WHITE_LABEL_CONFIG = {
     brandName: "EVRO", // Core brand name for protocol/version references
     appTagline: "Multi-chain stablecoin protocol",
     appDescription: "Borrow EVRO against multiple collateral types",
-    appUrl: "https://evrofinance.com/",
+    appUrl: "https://app.evro.finance/",
 
     // External links
     links: {
       docs: {
-        base: "https://docs.evrofinance.com/",
+        base: "https://docs.evro.finance/",
         redemptions: "https://docs.evrofinance.com/redemptions",
-        liquidations: "https://docs.evrofinance.com/liquidations",
-        delegation: "https://docs.evrofinance.com/delegation",
-        interestRates: "https://docs.evrofinance.com/interest-rates",
-        earn: "https://docs.evrofinance.com/earn",
-        staking: "https://docs.evrofinance.com/staking",
+        liquidations: "https://docs.evro.finance/liquidations",
+        delegation: "https://docs.evro.finance/delegation",
+        interestRates: "https://docs.evro.finance/interest-rates",
+        earn: "https://docs.evro.finance/earn",
+        staking: "https://docs.evro.finance/staking",
       },
       dune: "https://dune.com/evrofinance",
       discord: "https://discord.gg/evrofinance",
       github: "https://github.com/evrofinance/evrofinance",
       x: "https://x.com/evrofinance",
-      friendlyForkProgram: "https://evrofinance.com/ecosystem",
+      friendlyForkProgram: "https://evro.finance/ecosystem",
     },
 
     // Feature flags and descriptions
-    features: {
-      showV1Legacy: false, // No V1 legacy content
-      friendlyFork: {
-        enabled: true,
-        title: "Learn more about the Friendly Fork Program",
-        description: "A program for collaborative protocol development",
-      },
-    },
+    // features: {
+    //   showV1Legacy: false, // No V1 legacy content
+    //   friendlyFork: {
+    //     enabled: true,
+    //     title: "Learn more about the Friendly Fork Program",
+    //     description: "A program for collaborative protocol development",
+    //   },
+    // },
 
     // Navigation configuration
     navigation: {
