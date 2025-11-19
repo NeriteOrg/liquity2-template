@@ -222,11 +222,6 @@ export default {
 					</>
 				),
 				titleAttr: "Stability Pool depositors earn additional rewards from forks.",
-				learnMore: {
-					url: WHITE_LABEL_CONFIG.branding.links.friendlyForkProgram,
-					label: "Learn more",
-					title: WHITE_LABEL_CONFIG.branding.features.friendlyFork.title,
-				},
 			},
 		},
 		yieldTable: {
