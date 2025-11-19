@@ -163,7 +163,7 @@ function ButtonConnected({
 					translate: "0 1px",
 				},
 				_focusVisible: {
-					borderRadius: 4,
+					borderRadius: 0,
 					outline: "2px solid token(colors.focused)",
 				},
 			})}

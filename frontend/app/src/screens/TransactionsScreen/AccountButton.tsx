@@ -22,7 +22,7 @@ export function AccountButton({
 						display: "flex",
 						alignItems: "center",
 						gap: 4,
-						borderRadius: 16,
+						borderRadius: 0,
 					})}
 				>
 					<Image
@@ -32,7 +32,7 @@ export function AccountButton({
 						src={blo(address)}
 						className={css({
 							display: "block",
-							borderRadius: 4,
+							borderRadius: 0,
 						})}
 					/>
 					{shortenAddress(address, 4).toLowerCase()}

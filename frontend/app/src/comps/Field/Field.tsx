@@ -40,7 +40,7 @@ export function Field({
 				gap: 8,
 				backgroundColor: "white",
 				padding: 16,
-				borderRadius: 8,
+				borderRadius: 0,
 				border: "1px solid",
 				borderColor: "gray:300",
 			})}

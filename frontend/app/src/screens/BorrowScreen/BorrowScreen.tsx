@@ -242,8 +242,8 @@ export function BorrowScreen() {
 						placeholder="0.00"
 						secondary={{
 							start: `$${deposit.parsed && collPrice.data
-									? fmtnum(dn.mul(collPrice.data, deposit.parsed), "2z")
-									: "0.00"
+								? fmtnum(dn.mul(collPrice.data, deposit.parsed), "2z")
+								: "0.00"
 								}`,
 							end: maxAmount && dn.gt(maxAmount, 0) && (
 								<TextButton
@@ -291,8 +291,8 @@ export function BorrowScreen() {
 						placeholder="0.00"
 						secondary={{
 							start: `$${debt.parsed
-									? fmtnum(debt.parsed)
-									: "0.00"
+								? fmtnum(debt.parsed)
+								: "0.00"
 								}`,
 							end: debtSuggestions && (
 								<HFlex gap={6}>
@@ -424,7 +424,7 @@ export function BorrowScreen() {
 						color: "content",
 						background: "infoSurface",
 						border: "1px solid token(colors.infoSurfaceBorder)",
-						borderRadius: 8,
+						borderRadius: 0,
 					})}
 				>
 					<div

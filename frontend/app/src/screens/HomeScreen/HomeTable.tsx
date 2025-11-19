@@ -30,7 +30,7 @@ export function HomeTable<Cols extends readonly ReactNode[]>({
 				gap: 32,
 				padding: "12px 16px 16px",
 				background: "surface",
-				borderRadius: 8,
+				borderRadius: 0,
 				border: "1px solid",
 				borderColor: "gray:300",
 			})}
@@ -120,7 +120,7 @@ export function HomeTable<Cols extends readonly ReactNode[]>({
 									padding: "12px 16px",
 									color: "disabledContent",
 									background: "disabledSurface",
-									borderRadius: 8,
+									borderRadius: 0,
 								})}
 							>
 								{placeholder ?? "No data"}

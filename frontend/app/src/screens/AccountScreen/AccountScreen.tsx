@@ -50,7 +50,7 @@ export function AccountScreen({
 						padding: "16px 16px 24px",
 						color: "strongSurfaceContent",
 						background: "strongSurface",
-						borderRadius: 8,
+						borderRadius: 0,
 						userSelect: "none",
 					})}
 				>
@@ -93,7 +93,7 @@ export function AccountScreen({
 							className={css({
 								width: 32,
 								height: "auto",
-								borderRadius: 8,
+								borderRadius: 0,
 							})}
 						/>
 					</div>
