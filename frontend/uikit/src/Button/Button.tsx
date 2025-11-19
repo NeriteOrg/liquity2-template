@@ -84,7 +84,7 @@ export function useButtonStyles({
 			height: 74,
 			padding: "0 30px",
 			fontSize: 24,
-			borderRadius: 120,
+			borderRadius: 0,
 		}))
 		.exhaustive();
 

@@ -251,6 +251,9 @@ export function BorrowScreen() {
 									onClick={() => {
 										deposit.setValue(dn.toString(maxAmount));
 									}}
+									className={css({
+										borderRadius: 0,
+									})}
 								/>
 							),
 						}}

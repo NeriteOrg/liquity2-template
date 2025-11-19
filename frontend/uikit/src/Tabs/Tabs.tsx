@@ -106,7 +106,7 @@ export function Tabs({
 			activeTab: {
 				border: 0,
 				"--background": token("colors.accent"),
-				borderRadius: 12,
+				borderRadius: 0,
 			},
 			tabsGap: 0,
 		}
