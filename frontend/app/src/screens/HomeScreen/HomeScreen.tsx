@@ -276,24 +276,6 @@ function ForksInfoDrawer() {
 					</span>
 				</div>
 			</div>
-			<div
-				className={css({
-					display: "flex",
-					alignItems: "center",
-				})}
-			>
-				<LinkTextButton
-					external
-					href={content.home.earnTable.forksInfo.learnMore.url}
-					label={content.home.earnTable.forksInfo.learnMore.label}
-					title={content.home.earnTable.forksInfo.learnMore.title}
-					className={css({
-						fontSize: 14,
-					})}
-				>
-					Learn more
-				</LinkTextButton>
-			</div>
 		</div>
 	);
 }
