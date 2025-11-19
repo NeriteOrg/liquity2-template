@@ -19,274 +19,273 @@ const DISPLAYED_PRICES = [WHITE_LABEL_CONFIG.tokens.governanceToken.symbol, WHIT
 const ENABLE_REDEEM = false;
 
 export function BottomBar() {
-  const account = useAccount();
-  const stats = useLiquityStats();
+	const account = useAccount();
+	const stats = useLiquityStats();
 
-  const tvl = stats.data?.totalValueLocked;
-  const boldSupply = stats.data?.totalBoldSupply;
+	const tvl = stats.data?.totalValueLocked;
+	const boldSupply = stats.data?.totalBoldSupply;
 
-  return (
-    <div
-      className={css({
-        overflow: "hidden",
-        width: "100%",
-        padding: {
-          base: 0,
-          medium: "0 24px",
-        },
-      })}
-    >
-      <div
-        className={css({
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-          height: 40,
-          paddingRight: {
-            base: 16,
-            medium: 0,
-          },
-        })}
-      >
-        <AboutButton />
-      </div>
-      <div
-        className={css({
-          display: "flex",
-          width: "100%",
-        })}
-      >
-        <div
-          className={css({
-            overflowX: "auto",
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 16,
-            width: "100%",
-            maxWidth: "100%",
-            height: 48,
-            paddingLeft: {
-              base: 12,
-              medium: 0,
-            },
-            fontSize: 12,
-            borderTop: "1px solid token(colors.tableBorder)",
-            userSelect: "none",
-          })}
-        >
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            })}
-          >
-            <div
-              className={css({
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-              })}
-            >
-              <Logo size={16} />
-              <span>TVL</span>{" "}
-              <span>
-                {tvl && (
-                  <Amount
-                    fallback="…"
-                    format="compact"
-                    prefix="$"
-                    value={tvl}
-                  />
-                )}
-              </span>
-            </div>
-            <div
-              title={`Total supply: ${
-                fmtnum(boldSupply, {
-                  suffix: ` ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`,
-                  preset: "2z",
-                })
-              }`}
-              className={css({
-                display: "flex",
-                alignItems: "center",
-                gap: 4,
-                whiteSpace: "nowrap",
-              })}
-            >
-              <div
-                className={css({
-                  flexShrink: 0,
-                })}
-              >
-                <TokenIcon
-                  title={null}
-                  symbol={WHITE_LABEL_CONFIG.tokens.mainToken.symbol}
-                  size={16}
-                />
-              </div>
-              <span>
-                {boldSupply && (
-                  <Amount
-                    title={null}
-                    fallback="…"
-                    format="compact"
-                    value={boldSupply}
-                    suffix={` ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`}
-                  />
-                )}
-              </span>
-            </div>
-            {ENABLE_REDEEM && (
-              <LinkTextButton
-                id="footer-redeem-button"
-                href="/redeem"
-                label={
-                  <div
-                    className={css({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                      whiteSpace: "nowrap",
-                    })}
-                  >
-                    Redeem {WHITE_LABEL_CONFIG.tokens.mainToken.symbol}
-                  </div>
-                }
-                className={css({
-                  color: "content",
-                  borderRadius: 4,
-                  _focusVisible: { outline: "2px solid token(colors.focused)" },
-                  _active: { translate: "0 1px" },
-                })}
-              />
-            )}
-          </div>
-          <div
-            className={css({
-              display: "flex",
-              alignItems: "center",
-              gap: 16,
-            })}
-          >
-            {DISPLAYED_PRICES.map((symbol) => (
-              <Price
-                key={symbol}
-                symbol={symbol}
-              />
-            ))}
-            {account.address && ACCOUNT_SCREEN && (
-              <LinkTextButton
-                id="footer-account-button"
-                href={`/account?address=${account.address}`}
-                label={
-                  <div
-                    className={css({
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 4,
-                    })}
-                  >
-                    <Image
-                      alt=""
-                      width={16}
-                      height={16}
-                      src={blo(account.address)}
-                      className={css({
-                        borderRadius: "50%",
-                      })}
-                    />
+	return (
+		<div
+			className={css({
+				overflow: "hidden",
+				width: "100%",
+				padding: {
+					base: 0,
+					medium: "0 24px",
+				},
+			})}
+		>
+			<div
+				className={css({
+					display: "flex",
+					alignItems: "center",
+					justifyContent: "flex-end",
+					height: 40,
+					paddingRight: {
+						base: 16,
+						medium: 0,
+					},
+				})}
+			>
+				<AboutButton />
+			</div>
+			<div
+				className={css({
+					display: "flex",
+					width: "100%",
+				})}
+			>
+				<div
+					className={css({
+						overflowX: "auto",
+						display: "flex",
+						justifyContent: "space-between",
+						gap: 16,
+						width: "100%",
+						maxWidth: "100%",
+						height: 48,
+						paddingLeft: {
+							base: 12,
+							medium: 0,
+						},
+						fontSize: 12,
+						borderTop: "1px solid token(colors.tableBorder)",
+						userSelect: "none",
+					})}
+				>
+					<div
+						className={css({
+							display: "flex",
+							alignItems: "center",
+							gap: 16,
+						})}
+					>
+						<div
+							className={css({
+								display: "flex",
+								alignItems: "center",
+								gap: 4,
+							})}
+						>
+							<Logo size={16} />
+							<span>TVL</span>{" "}
+							<span>
+								{tvl && (
+									<Amount
+										fallback="…"
+										format="compact"
+										prefix="$"
+										value={tvl}
+									/>
+								)}
+							</span>
+						</div>
+						<div
+							title={`Total supply: ${fmtnum(boldSupply, {
+								suffix: ` ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`,
+								preset: "2z",
+							})
+								}`}
+							className={css({
+								display: "flex",
+								alignItems: "center",
+								gap: 4,
+								whiteSpace: "nowrap",
+							})}
+						>
+							<div
+								className={css({
+									flexShrink: 0,
+								})}
+							>
+								<TokenIcon
+									title={null}
+									symbol={WHITE_LABEL_CONFIG.tokens.mainToken.symbol}
+									size={16}
+								/>
+							</div>
+							<span>
+								{boldSupply && (
+									<Amount
+										title={null}
+										fallback="…"
+										format="compact"
+										value={boldSupply}
+										suffix={` ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`}
+									/>
+								)}
+							</span>
+						</div>
+						{ENABLE_REDEEM && (
+							<LinkTextButton
+								id="footer-redeem-button"
+								href="/redeem"
+								label={
+									<div
+										className={css({
+											display: "flex",
+											alignItems: "center",
+											gap: 4,
+											whiteSpace: "nowrap",
+										})}
+									>
+										Redeem {WHITE_LABEL_CONFIG.tokens.mainToken.symbol}
+									</div>
+								}
+								className={css({
+									color: "content",
+									borderRadius: 0,
+									_focusVisible: { outline: "2px solid token(colors.focused)" },
+									_active: { translate: "0 1px" },
+								})}
+							/>
+						)}
+					</div>
+					<div
+						className={css({
+							display: "flex",
+							alignItems: "center",
+							gap: 16,
+						})}
+					>
+						{DISPLAYED_PRICES.map((symbol) => (
+							<Price
+								key={symbol}
+								symbol={symbol}
+							/>
+						))}
+						{account.address && ACCOUNT_SCREEN && (
+							<LinkTextButton
+								id="footer-account-button"
+								href={`/account?address=${account.address}`}
+								label={
+									<div
+										className={css({
+											display: "flex",
+											alignItems: "center",
+											gap: 4,
+										})}
+									>
+										<Image
+											alt=""
+											width={16}
+											height={16}
+											src={blo(account.address)}
+											className={css({
+												borderRadius: "50%",
+											})}
+										/>
 
-                    {shortenAddress(account.address, 3)}
-                  </div>
-                }
-                className={css({
-                  color: "content",
-                  whiteSpace: "nowrap",
-                })}
-              />
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+										{shortenAddress(account.address, 3)}
+									</div>
+								}
+								className={css({
+									color: "content",
+									whiteSpace: "nowrap",
+								})}
+							/>
+						)}
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 }
 
 function getTokenAddress(symbol: TokenSymbol) {
-  if (symbol === WHITE_LABEL_CONFIG.tokens.governanceToken.symbol) {
-    return CONTRACT_LQTY_TOKEN;
-  }
-  if (symbol === WHITE_LABEL_CONFIG.tokens.mainToken.symbol) {
-    return CONTRACT_MAIN_TOKEN;
-  }
-  return null;
+	if (symbol === WHITE_LABEL_CONFIG.tokens.governanceToken.symbol) {
+		return CONTRACT_LQTY_TOKEN;
+	}
+	if (symbol === WHITE_LABEL_CONFIG.tokens.mainToken.symbol) {
+		return CONTRACT_MAIN_TOKEN;
+	}
+	return null;
 }
 
 function getTokenLink(address: Address) {
-  if (!CHAIN_BLOCK_EXPLORER) {
-    return null;
-  }
-  return address && `${CHAIN_BLOCK_EXPLORER.url}token/${address}`;
+	if (!CHAIN_BLOCK_EXPLORER) {
+		return null;
+	}
+	return address && `${CHAIN_BLOCK_EXPLORER.url}token/${address}`;
 }
 
 function Price({ symbol }: { symbol: Exclude<TokenSymbol, "SBOLD"> }) {
-  const price = usePrice(symbol);
-  const tokenAddress = getTokenAddress(symbol);
-  const tokenUrl = tokenAddress && getTokenLink(tokenAddress);
-  const token = (
-    <div
-      className={css({
-        display: "flex",
-        alignItems: "center",
-        gap: 4,
-      })}
-    >
-      <TokenIcon
-        size={16}
-        symbol={symbol}
-        title={null}
-      />
-      <span>{symbol}</span>
-    </div>
-  );
-  return (
-    <div
-      className={css({
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      })}
-    >
-      {tokenUrl
-        ? (
-          <LinkTextButton
-            title={`${symbol}: ${tokenAddress}`}
-            external
-            href={tokenUrl}
-            label={token}
-            className={css({
-              color: "content!",
-              _hover: {
-                textDecoration: "underline",
-              },
-              _focusVisible: {
-                outline: "2px solid token(colors.focused)",
-              },
-              _active: {
-                translate: "0 1px",
-              },
-            })}
-          />
-        )
-        : token}
-      <Amount
-        prefix="$"
-        fallback="…"
-        value={price.data}
-        format="2z"
-      />
-    </div>
-  );
+	const price = usePrice(symbol);
+	const tokenAddress = getTokenAddress(symbol);
+	const tokenUrl = tokenAddress && getTokenLink(tokenAddress);
+	const token = (
+		<div
+			className={css({
+				display: "flex",
+				alignItems: "center",
+				gap: 4,
+			})}
+		>
+			<TokenIcon
+				size={16}
+				symbol={symbol}
+				title={null}
+			/>
+			<span>{symbol}</span>
+		</div>
+	);
+	return (
+		<div
+			className={css({
+				display: "flex",
+				alignItems: "center",
+				gap: 8,
+			})}
+		>
+			{tokenUrl
+				? (
+					<LinkTextButton
+						title={`${symbol}: ${tokenAddress}`}
+						external
+						href={tokenUrl}
+						label={token}
+						className={css({
+							color: "content!",
+							_hover: {
+								textDecoration: "underline",
+							},
+							_focusVisible: {
+								outline: "2px solid token(colors.focused)",
+							},
+							_active: {
+								translate: "0 1px",
+							},
+						})}
+					/>
+				)
+				: token}
+			<Amount
+				prefix="$"
+				fallback="…"
+				value={price.data}
+				format="2z"
+			/>
+		</div>
+	);
 }
