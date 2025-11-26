@@ -48,32 +48,12 @@ export const WHITE_LABEL_CONFIG = {
       icon: "main-token",
       // Core protocol contracts (deployment addresses TBD)
       deployments: {
-        646: {
-          // Ronin
-          token: "0x0000000000000000000000000000000000000000", // TBD - EVRO deployment
-          collateralRegistry: "0x0000000000000000000000000000000000000000", // TBD
-          governance: "0x0000000000000000000000000000000000000000", // TBD
-          hintHelpers: "0x0000000000000000000000000000000000000000", // TBD
-          multiTroveGetter: "0x0000000000000000000000000000000000000000", // TBD
-          exchangeHelpers: "0x0000000000000000000000000000000000000000", // TBD
-        },
-        // Placeholder for build compatibility (remove after deployment)
-        1: {
-          // Mainnet (placeholder)
-          token: "0x0000000000000000000000000000000000000000",
-          collateralRegistry: "0x0000000000000000000000000000000000000000",
-          governance: "0x0000000000000000000000000000000000000000",
-          hintHelpers: "0x0000000000000000000000000000000000000000",
-          multiTroveGetter: "0x0000000000000000000000000000000000000000",
-          exchangeHelpers: "0x0000000000000000000000000000000000000000",
-        },
-        11155111: {
-          // Sepolia (placeholder)
-          token: "0x0000000000000000000000000000000000000000",
-          collateralRegistry: "0x0000000000000000000000000000000000000000",
-          governance: "0x0000000000000000000000000000000000000000",
-          hintHelpers: "0x0000000000000000000000000000000000000000",
-          multiTroveGetter: "0x0000000000000000000000000000000000000000",
+        100: {
+          token: "0x08b8a74e622f810ef67e4850c102b3093627f630",
+          collateralRegistry: "0x78f975dafc51ffce9eda2e6559adf742cf4fe518",
+          governance: "0x09d5bd4a4f1da1a965fe24ea54bce3d37661e056",
+          hintHelpers: "0x619f3e62aad50f647f445ab1de8daaf0e60362fd",
+          multiTroveGetter: "0x593c9d9fd8320a2392404fc7b0b581f2fb54d0ba",
           exchangeHelpers: "0x0000000000000000000000000000000000000000",
         },
       },
@@ -87,12 +67,12 @@ export const WHITE_LABEL_CONFIG = {
       decimals: 18,
       description: "Euro-pegged stablecoin by EVRO Finance",
       deployments: {
-        646: {
-          token: "0x0000000000000000000000000000000000000000",
-          collateralRegistry: "0x0000000000000000000000000000000000000000",
-          governance: "0x0000000000000000000000000000000000000000",
-          hintHelpers: "0x0000000000000000000000000000000000000000",
-          multiTroveGetter: "0x0000000000000000000000000000000000000000",
+        100: {
+          token: "0x08b8a74e622f810ef67e4850c102b3093627f630",
+          collateralRegistry: "0x78f975dafc51ffce9eda2e6559adf742cf4fe518",
+          governance: "0x09d5bd4a4f1da1a965fe24ea54bce3d37661e056",
+          hintHelpers: "0x619f3e62aad50f647f445ab1de8daaf0e60362fd",
+          multiTroveGetter: "0x593c9d9fd8320a2392404fc7b0b581f2fb54d0ba",
           exchangeHelpers: "0x0000000000000000000000000000000000000000",
         },
       },
@@ -106,16 +86,7 @@ export const WHITE_LABEL_CONFIG = {
       icon: "main-token",
       // Only used as collateral, no governance features
       deployments: {
-        646: {
-          // Ronin mainnet
-          token: "0x0000000000000000000000000000000000000000",
-          staking: "0x0",
-        },
-        1: {
-          token: "0x0000000000000000000000000000000000000000",
-          staking: "0x0",
-        },
-        11155111: {
+        100: {
           token: "0x0000000000000000000000000000000000000000",
           staking: "0x0",
         },
@@ -124,65 +95,83 @@ export const WHITE_LABEL_CONFIG = {
 
     // Collateral tokens (for borrowing) - Multi-chain support
     collaterals: [
-      // === ETH-based collaterals (110% MCR, 90.91% max LTV) ===
       {
-        symbol: "ETH" as const,
-        name: "ETH",
-        icon: "eth",
+        symbol: "WXDAI" as const,
+        name: "wxDAI",
+        icon: "wxdai",
         collateralRatio: 1.1, // 110% MCR
         maxDeposit: "100000000", // $100M initial debt limit
         maxLTV: 0.9091, // 90.91% max LTV
-        // Deployment info (per chain)
         deployments: {
-          646: {
-            // EVRO Finance chain ID (TBD - needs actual deployment)
-            collToken: "0x0000000000000000000000000000000000000000", // TBD
-            leverageZapper: "0x0000000000000000000000000000000000000000", // TBD
-            stabilityPool: "0x0000000000000000000000000000000000000000", // TBD
-            troveManager: "0x0000000000000000000000000000000000000000", // TBD
-          },
-          // Placeholder deployments for build compatibility
-          1: {
-            collToken: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",
-            leverageZapper: "0x978d7188ae01881d254ad7e94874653b0c268004",
-            stabilityPool: "0xf69eb8c0d95d4094c16686769460f678727393cf",
-            troveManager: "0x81d78814df42da2cab0e8870c477bc3ed861de66",
-          },
-          11155111: {
-            collToken: "0x8116d0a0e8d4f0197b428c520953f302adca0b50",
-            leverageZapper: "0x482bf4d6a2e61d259a7f97ef6aac8b3ce5dd9f99",
-            stabilityPool: "0x89fb98c98792c8b9e9d468148c6593fa0fc47b40",
-            troveManager: "0x364038750236739e0cd96d5754516c9b8168fb0c",
+          100: {
+            collToken: "0x6a023ccd1ff6f2045c3309768ead9e68f978f6e1",
+            leverageZapper: "0x0000000000000000000000000000000000000000",
+            stabilityPool: "0x172b2bb699c354a8758075b00c121126a4a6ee18",
+            troveManager: "0x9c7987c8bed7a669b6857f014459e0e98ebd723d",
           },
         },
       },
       {
-        symbol: "RETH" as const,
-        name: "Rocket Pool ETH",
-        icon: "reth",
-        collateralRatio: 1.1, // 110% MCR for LSTs
+        symbol: "GNO" as const,
+        name: "Gnosis",
+        icon: "gno",
+        collateralRatio: 1.4, // 140% MCR for LSTs
         maxDeposit: "25000000", // $25M initial debt limit
         maxLTV: 0.9091, // 90.91% max LTV
         deployments: {
-          646: {
-            // EVRO Finance chain ID (TBD - needs actual rETH deployment)
-            collToken: "0x0000000000000000000000000000000000000000", // TBD
-            leverageZapper: "0x0000000000000000000000000000000000000000", // TBD
-            stabilityPool: "0x0000000000000000000000000000000000000000", // TBD
-            troveManager: "0x0000000000000000000000000000000000000000", // TBD
+          100: {
+            collToken: "0x9c58bacc331c9aa871afd802db6379a98e80cedb",
+            leverageZapper: "0x0000000000000000000000000000000000000000",
+            stabilityPool: "0x7cb2a8624f3bbc25c46d251d097ce971840eb0a5",
+            troveManager: "0x7e3f9edf299aa789e7b69af6d4f3c599ccaac4e6",
           },
-          // Placeholder deployments for build compatibility
-          1: {
-            collToken: "0xae78736cd615f374d3085123a210448e74fc6393",
-            leverageZapper: "0x7d5f19a1e48479a95c4eb40fd1a534585026e7e5",
-            stabilityPool: "0xc4463b26be1a6064000558a84ef9b6a58abe4f7a",
-            troveManager: "0xde026433882a9dded65cac4fff8402fafff40fca",
+        },
+      },
+      {
+        symbol: "SDAI" as const,
+        name: "Savings xDAI",
+        icon: "sdai",
+        collateralRatio: 1.3, // 130% MCR for LSTs
+        maxDeposit: "25000000", // $25M initial debt limit
+        maxLTV: 0.9091, // 90.91% max LTV
+        deployments: {
+          100: {
+            collToken: "0xaf204776c7245bf4147c2612bf6e5972ee483701",
+            leverageZapper: "0x0000000000000000000000000000000000000000",
+            stabilityPool: "0x4feb230c602a813674f261072ea2d31115ce1ab3",
+            troveManager: "0x5c21c09b120907262824a542d4cfd818e9e1a32f",
           },
-          11155111: {
-            collToken: "0xbdb72f78302e6174e48aa5872f0dd986ed6d98d9",
-            leverageZapper: "0x251dfe2078a910c644289f2344fac96bffea7c02",
-            stabilityPool: "0x8492ad1df9f89e4b6c54c81149058172592e1c94",
-            troveManager: "0x310fa1d1d711c75da45952029861bcf0d330aa81",
+        },
+      },
+      {
+        symbol: "WWBTC" as const,
+        name: "Gnosis xDai Bridged WBTC",
+        icon: "wwbtc",
+        collateralRatio: 1.15, // 115% MCR for LSTs
+        maxDeposit: "25000000", // $25M initial debt limit
+        maxLTV: 0.9091, // 90.91% max LTV
+        deployments: {
+          100: {
+            collToken: "0x95c0302bd25fb04258377d280e3d7f9c96d7b407",
+            leverageZapper: "0x0000000000000000000000000000000000000000",
+            stabilityPool: "0xf653fa22fa6e4d982db4f084e54ad0f39cbf73b3",
+            troveManager: "0x0b99b1a449160af496d4b50885c08d11704f2583",
+          },
+        },
+      },
+      {
+        symbol: "OSGNO" as const,
+        name: "StakeWise Staked GNO",
+        icon: "osgno",
+        collateralRatio: 1.4, // 140% MCR for LSTs
+        maxDeposit: "25000000", // $25M initial debt limit
+        maxLTV: 0.9091, // 90.91% max LTV
+        deployments: {
+          100: {
+            collToken: "0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0",
+            leverageZapper: "0x0000000000000000000000000000000000000000",
+            stabilityPool: "0x434696ce4b3c3d02e82931c37de7b9a8fa208fbd",
+            troveManager: "0x4d83ac3a1131c6ca5b0add168bde6d24a3ad889a",
           },
         },
       },

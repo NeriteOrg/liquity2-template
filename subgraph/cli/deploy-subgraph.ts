@@ -80,6 +80,10 @@ export async function main() {
     options.name ??= "liquity2-sepolia-preview";
     options.network ??= "sepolia";
   }
+  if (networkPreset === "gnosis") {
+    options.name ??= "evro-gnosis-preview";
+    options.network ??= "gnosis";
+  }
   if (networkPreset === "mainnet-relaunch") {
     options.name ??= "liquity-2-relaunch";
     options.network ??= "mainnet";

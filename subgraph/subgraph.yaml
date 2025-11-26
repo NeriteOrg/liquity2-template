@@ -6,8 +6,8 @@ dataSources:
     name: BoldToken
     source:
       abi: BoldToken
-      address: "0x6440f144b7e50d6a8439336510312d2f54beb01d"
-      startBlock: 22483043
+      address: "0x08b8a74e622f810ef67e4850c102b3093627f630"
+      startBlock: 42520891
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -32,13 +32,13 @@ dataSources:
         - event: CollateralRegistryAddressChanged(address)
           handler: handleCollateralRegistryAddressChanged
       file: ./src/BoldToken.mapping.ts
-    network: mainnet
+    network: gnosis
   - kind: ethereum/contract
     name: Governance
     source:
       abi: Governance
-      address: "0x807def5e7d057df05c796f4bc75c3fe82bd6eee1"
-      startBlock: 22496547
+      address: "0x09d5bd4a4f1da1a965fe24ea54bce3d37661e056"
+      startBlock: 42520891
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.9
@@ -62,11 +62,11 @@ dataSources:
         - event: RegisterInitiative(address,address,uint256,uint8)
           handler: handleRegisterInitiative
       file: ./src/Governance.mapping.ts
-    network: mainnet
+    network: gnosis
 templates:
   - name: TroveManager
     kind: ethereum/contract
-    network: mainnet
+    network: gnosis
     source:
       abi: TroveManager
     mapping:
@@ -102,7 +102,7 @@ templates:
           handler: handleBatchUpdated
   - name: TroveNFT
     kind: ethereum/contract
-    network: mainnet
+    network: gnosis
     source:
       abi: TroveNFT
     mapping:
