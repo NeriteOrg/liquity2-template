@@ -4,7 +4,7 @@ import type { BranchId, ChainId, CollateralSymbol, IcStrategy, RiskLevel } from 
 
 import { vEnvLegacyCheck } from "@/src/valibot-utils";
 import { WHITE_LABEL_CONFIG } from "@/src/white-label.config";
-import { getDeploymentInfo } from "@/src/white-label-utils";
+// import { getDeploymentInfo } from "@/src/white-label-utils";
 import { norm } from "@liquity2/uikit";
 import * as dn from "dnum";
 import * as v from "valibot";
@@ -106,18 +106,18 @@ export const DEFAULT_LEGACY_CHECKS = new Map<
   ChainId,
   Exclude<v.InferOutput<ReturnType<typeof vEnvLegacyCheck>>, boolean>
 >([
-  // mainnet
-  [1, {
-    ...getDeploymentInfo(1),
-    INITIATIVES_SNAPSHOT_URL: "/initiatives-snapshot-1.json",
-    TROVES_SNAPSHOT_URL: "/troves-snapshot-1.json",
-  }],
-  // sepolia
-  [11155111, {
-    ...getDeploymentInfo(11155111),
-    INITIATIVES_SNAPSHOT_URL: "/initiatives-snapshot-11155111.json",
-    TROVES_SNAPSHOT_URL: "/troves-snapshot-11155111.json",
-  }],
+  // // mainnet
+  // [1, {
+  //   ...getDeploymentInfo(1),
+  //   INITIATIVES_SNAPSHOT_URL: "/initiatives-snapshot-1.json",
+  //   TROVES_SNAPSHOT_URL: "/troves-snapshot-1.json",
+  // }],
+  // // sepolia
+  // [11155111, {
+  //   ...getDeploymentInfo(11155111),
+  //   INITIATIVES_SNAPSHOT_URL: "/initiatives-snapshot-11155111.json",
+  //   TROVES_SNAPSHOT_URL: "/troves-snapshot-11155111.json",
+  // }],
 ]);
 
 // default COLL_$INDEX_IC_STRATEGIES values when not set by the env

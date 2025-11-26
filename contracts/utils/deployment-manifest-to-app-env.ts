@@ -41,12 +41,7 @@ const ZDeploymentManifest = z.object({
   debtInFrontHelper: ZAddress,
   exchangeHelpers: ZAddress,
 
-  governance: z.object({
-    LUSDToken: ZAddress,
-    LQTYToken: ZAddress,
-    stakingV1: ZAddress,
-    governance: ZAddress,
-  }),
+  governance: ZAddress,
 
   branches: z.array(
     z.object({
