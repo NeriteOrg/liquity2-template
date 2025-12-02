@@ -213,7 +213,7 @@ function BorrowingRow({
 					})}
 				>
 					<TokenIcon symbol={symbol} size="mini" />
-					<span>{collateral?.name}</span>
+					<span>{collateral?.symbol}</span>
 				</div>
 			</td>
 			<td>
@@ -235,6 +235,13 @@ function BorrowingRow({
 					prefix="$"
 					fallback="…"
 					value={branchDebt.data}
+				/>
+				{' / '}
+				<Amount
+					format="compact"
+					prefix="$"
+					fallback="…"
+					value={Number(collateral.maxDeposit)}
 				/>
 			</td>
 			{!compact && (

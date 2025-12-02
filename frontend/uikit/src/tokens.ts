@@ -72,6 +72,7 @@ export function isCollateralSymbol(symbol: string): symbol is CollateralSymbol {
 
 export type CollateralToken = Token & {
   collateralRatio: number;
+  maxDeposit: string;
   symbol: CollateralSymbol;
 };
 
@@ -124,6 +125,7 @@ export const COLLATERALS: CollateralToken[] =
     return {
       collateralRatio: collateral.collateralRatio,
       icon: iconUrl || tokenIconMap["main-token"], // fallback to main token icon
+      maxDeposit: collateral.maxDeposit,
       name: collateral.name,
       symbol: collateral.symbol,
     };
