@@ -117,7 +117,7 @@ export const WHITE_LABEL_CONFIG = {
         icon: "gno",
         collateralRatio: 1.4, // 140% MCR
         maxDeposit: "25000000", // $25M initial debt limit
-        maxLTV: 0.9091, // 90.91% max LTV
+        maxLTV: 0.7143, // 71.43% max LTV
         deployments: {
           100: {
             collToken: "0x9c58bacc331c9aa871afd802db6379a98e80cedb",
@@ -133,7 +133,7 @@ export const WHITE_LABEL_CONFIG = {
         icon: "sdai",
         collateralRatio: 1.3, // 130% MCR
         maxDeposit: "25000000", // $25M initial debt limit
-        maxLTV: 0.9091, // 90.91% max LTV
+        maxLTV: 0.7692, // 76.92% max LTV
         deployments: {
           100: {
             collToken: "0xaf204776c7245bf4147c2612bf6e5972ee483701",
@@ -149,7 +149,7 @@ export const WHITE_LABEL_CONFIG = {
         icon: "wwbtc",
         collateralRatio: 1.15, // 115% MCR
         maxDeposit: "25000000", // $25M initial debt limit
-        maxLTV: 0.9091, // 90.91% max LTV
+        maxLTV: 0.8696, // 86.96% max LTV
         deployments: {
           100: {
             collToken: "0x95c0302bd25fb04258377d280e3d7f9c96d7b407",
@@ -165,7 +165,7 @@ export const WHITE_LABEL_CONFIG = {
         icon: "osgno",
         collateralRatio: 1.4, // 140% MCR
         maxDeposit: "25000000", // $25M initial debt limit
-        maxLTV: 0.9091, // 90.91% max LTV
+        maxLTV: 0.7143, // 71.43% max LTV
         deployments: {
           100: {
             collToken: "0xf490c80aae5f2616d3e3bda2483e30c4cb21d1a0",

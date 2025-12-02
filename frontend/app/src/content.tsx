@@ -46,14 +46,14 @@ export default {
 		loanLtv: [
 			"Loan-to-value ratio",
 			<>
-				The ratio between the amount of ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} borrowed and the deposited collateral (in USD).
+				The ratio between the amount of ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} borrowed and the deposited collateral (in EUR).
 			</>,
 		],
 		loanMaxLtv: [
 			"Maximum Loan-To-Value (LTV) Ratio",
 			<>
-				The maximum ratio between the USD value of a loan (in ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}) and the collateral backing it. The LTV will
-				fluctuate as the price of the collateral changes. To decrease the LTV add more colateral or reduce debt.
+				The maximum ratio between the EUR value of a loan (in ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}) and the collateral backing it. The LTV will
+				fluctuate as the price of the collateral changes. To decrease the LTV add more collateral or reduce debt.
 			</>,
 		],
 		loanLiquidationPrice: [
@@ -107,7 +107,7 @@ export default {
 		),
 		infoItems: [
 			{
-				icon: "bold",
+				icon: "evro",
 				text: `Redemptions occur when ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} drops below $1.`,
 			},
 			{
@@ -214,15 +214,7 @@ export default {
 		},
 		earnTable: {
 			title: `Earn rewards with ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`,
-			subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} & ETH rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
-			forksInfo: {
-				text: (
-					<>
-						<abbr title="Stability Pool">SP</abbr> depositors earn additional rewards from forks.
-					</>
-				),
-				titleAttr: "Stability Pool depositors earn additional rewards from forks.",
-			},
+			subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} & other asset rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
 		},
 		yieldTable: {
 			title: "Top 3 external yield opportunities",
@@ -385,7 +377,7 @@ export default {
 		rewardsPanel: {
 			boldRewardsLabel: "Your earnings from protocol revenue distributions to this stability pool",
 			collRewardsLabel: "Your proceeds from liquidations conducted by this stability pool",
-			totalUsdLabel: "Total in USD",
+			totalUsdLabel: "Total in EUR",
 			expectedGasFeeLabel: "Expected gas fee",
 			action: "Next: Summary",
 		},
@@ -463,9 +455,9 @@ export default {
 		},
 		rewardsPanel: {
 			label: "You claim",
-			details: (usdAmount: N, fee: N) => (
+			details: (eurAmount: N, fee: N) => (
 				<>
-					~${usdAmount} • Expected gas fee ~${fee}
+					~€{eurAmount} • Expected gas fee ~€{fee}
 				</>
 			),
 			action: "Next: Summary",

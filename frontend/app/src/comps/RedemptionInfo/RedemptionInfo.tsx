@@ -8,7 +8,7 @@ import { memo } from "react";
 const { title, subtitle, infoItems, learnMore } = content.redemptionInfo;
 
 const iconComponents = {
-	bold: BoldIcon,
+	evro: BoldIcon,
 	redemption: RedemptionIcon,
 	interest: InterestIcon,
 } as const;
@@ -175,17 +175,15 @@ export const RedemptionInfo = memo(function RedemptionInfo() {
 
 function BoldIcon() {
 	return (
-		<svg width="24" height="24" fill="none">
-			<rect width="24" height="24" fill="#63D77D" rx="12" />
-			<path
-				fill="#1C1D4F"
-				fillRule="evenodd"
-				d={"M8.733 4H6.066v16H11.4v-.64c.801.409 1.708.64 2.67.64"
-					+ "a5.866 5.866 0 1 0-2.67-11.092V4H8.733Z"
-					+ "m2.666 4.908a5.866 5.866 0 0 0-3.197 5.226"
-					+ "c0 2.278 1.3 4.254 3.197 5.225V8.91Z"}
-				clipRule="evenodd"
-			/>
+		<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+			<rect width="24" height="24" rx="12" fill="url(#paint0_linear_513_2396)"/>
+			<path d="M6.5994 17.9559L6 5.2793L8.4532 6.09581L12.2215 5.37242L18.0267 5.36954L17.035 8.06409L8.4532 7.52576L8.99154 16.1391L18.0254 14.7975V17.9391L8.99154 17.4008L6.5994 17.9559ZM7.56386 13.0561L7.79652 10.1119L14.3749 10.7558L17.035 13.0561H7.56386Z" fill="#FDFEFD"/>
+			<defs>
+			<linearGradient id="paint0_linear_513_2396" x1="12" y1="0" x2="12" y2="24" gradientUnits="userSpaceOnUse">
+			<stop stop-color="#A182F6"/>
+			<stop offset="1" stop-color="#263B67"/>
+			</linearGradient>
+			</defs>
 		</svg>
 	);
 }
