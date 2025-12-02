@@ -107,7 +107,7 @@ export default {
 		),
 		infoItems: [
 			{
-				icon: "bold",
+				icon: "evro",
 				text: `Redemptions occur when ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} drops below $1.`,
 			},
 			{
