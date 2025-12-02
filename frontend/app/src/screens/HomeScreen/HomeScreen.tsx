@@ -241,7 +241,7 @@ function BorrowingRow({
 					format="compact"
 					prefix="$"
 					fallback="…"
-					value={Number(collateral.maxDeposit)}
+					value={Number(collateral?.maxDeposit)}
 				/>
 			</td>
 			{!compact && (

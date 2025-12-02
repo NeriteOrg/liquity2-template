@@ -53,7 +53,7 @@ export default {
 			"Maximum Loan-To-Value (LTV) Ratio",
 			<>
 				The maximum ratio between the EUR value of a loan (in ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}) and the collateral backing it. The LTV will
-				fluctuate as the price of the collateral changes. To decrease the LTV add more colateral or reduce debt.
+				fluctuate as the price of the collateral changes. To decrease the LTV add more collateral or reduce debt.
 			</>,
 		],
 		loanLiquidationPrice: [
