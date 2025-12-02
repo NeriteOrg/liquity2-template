@@ -7,7 +7,6 @@ import { useBreakpoint } from "@/src/breakpoints";
 import { Amount } from "@/src/comps/Amount/Amount";
 import { LinkTextButton } from "@/src/comps/LinkTextButton/LinkTextButton";
 import { Positions } from "@/src/comps/Positions/Positions";
-import { FORKS_INFO } from "@/src/constants";
 import content from "@/src/content";
 import { WHITE_LABEL_CONFIG } from "@/src/white-label.config";
 import { DNUM_1 } from "@/src/dnum-utils";
@@ -25,11 +24,8 @@ import { useAccount } from "@/src/wagmi-utils";
 import { css } from "@/styled-system/css";
 import { IconBorrow, IconEarn, TokenIcon } from "@liquity2/uikit";
 import * as dn from "dnum";
-import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { HomeTable } from "./HomeTable";
-
-type ForkInfo = (typeof FORKS_INFO)[number];
 
 export function HomeScreen() {
 	const account = useAccount();
@@ -185,96 +181,6 @@ function EarnTable({
 							);
 						})}
 				/>
-			</div>
-			<div
-				className={css({
-					position: "relative",
-					zIndex: 1,
-				})}
-			>
-				<ForksInfoDrawer />
-			</div>
-		</div>
-	);
-}
-
-function ForksInfoDrawer() {
-	const pickedForkIcons = useMemo(() => pickRandomForks(2), []);
-	return (
-		<div
-			className={css({
-				width: "100%",
-				display: "flex",
-				justifyContent: "space-between",
-				alignItems: "center",
-				gap: 16,
-				marginTop: -20,
-				height: 44 + 20,
-				padding: "20px 16px 0",
-				whiteSpace: "nowrap",
-				background: "#F7F7FF",
-				borderRadius: 0,
-				userSelect: "none",
-			})}
-		>
-			<div
-				className={css({
-					display: "flex",
-					gap: 12,
-				})}
-			>
-				<div
-					className={css({
-						flexShrink: 0,
-						display: "flex",
-						justifyContent: "center",
-						alignItems: "center",
-						gap: 0,
-					})}
-				>
-					{pickedForkIcons.map(([name, icon], index) => (
-						<div
-							key={name}
-							className={css({
-								display: "grid",
-								placeItems: "center",
-								background: "white",
-								borderRadius: "50%",
-								width: 18,
-								height: 18,
-							})}
-							style={{
-								marginLeft: index > 0 ? -4 : 0,
-							}}
-						>
-							<Image
-								loading="eager"
-								unoptimized
-								alt={name}
-								title={name}
-								height={18}
-								src={icon}
-								width={18}
-							/>
-						</div>
-					))}
-				</div>
-				<div
-					className={css({
-						display: "grid",
-						fontSize: 14,
-					})}
-				>
-					<span
-						title={content.home.earnTable.forksInfo.titleAttr}
-						className={css({
-							overflow: "hidden",
-							textOverflow: "ellipsis",
-						})}
-					>
-						{content.home.earnTable.forksInfo.text}
-					</span>
-				</div>
 			</div>
 		</div>
 	);
@@ -436,20 +342,4 @@ function EarnRewardsRow({
 			)}
 		</tr>
 	);
-}
-
-function pickRandomForks(count: number): ForkInfo[] {
-	const forks = [...FORKS_INFO];
-	if (forks.length < count) {
-		return forks;
-	}
-	const picked: ForkInfo[] = [];
-	for (let i = 0; i < count; i++) {
-		const [info] = forks.splice(
-			Math.floor(Math.random() * forks.length),
-			1,
-		);
-		if (info) picked.push(info);
-	}
-	return picked;
 }
