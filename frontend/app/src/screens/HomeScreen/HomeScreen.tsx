@@ -213,7 +213,7 @@ function BorrowingRow({
 					})}
 				>
 					<TokenIcon symbol={symbol} size="mini" />
-					<span>{collateral?.symbol}</span>
+					<span>{collateral?.name}</span>
 				</div>
 			</td>
 			<td>
