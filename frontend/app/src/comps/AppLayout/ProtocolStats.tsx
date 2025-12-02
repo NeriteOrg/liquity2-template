@@ -7,7 +7,6 @@ import { Logo } from "@/src/comps/Logo/Logo";
 import { LinkTextButton } from "@/src/comps/LinkTextButton/LinkTextButton";
 import { ACCOUNT_SCREEN } from "@/src/env";
 import { useLiquityStats } from "@/src/liquity-utils";
-import { usePrice } from "@/src/services/Prices";
 import { useAccount } from "@/src/wagmi-utils";
 import { css } from "@/styled-system/css";
 import {
@@ -23,7 +22,7 @@ import Image from "next/image";
 import * as dn from "dnum";
 import { WHITE_LABEL_CONFIG } from "@/src/white-label.config";
 
-const DISPLAYED_PRICES = [WHITE_LABEL_CONFIG.tokens.mainToken.symbol, "ETH"] as const;
+const DISPLAYED_PRICES = [WHITE_LABEL_CONFIG.tokens.mainToken.symbol] as const;
 
 export function ProtocolStats() {
 	const account = useAccount();
@@ -171,7 +170,7 @@ export function ProtocolStats() {
 }
 
 function Price({ symbol }: { symbol: TokenSymbol }) {
-	const price = usePrice(symbol);
+	const price = { data: 1 };
 	return (
 		<HFlex key={symbol} gap={4}>
 			<TokenIcon size={16} symbol={symbol} />

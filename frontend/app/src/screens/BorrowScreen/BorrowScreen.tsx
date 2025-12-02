@@ -191,7 +191,7 @@ export function BorrowScreen() {
 										/>
 									))}
 								</TokenIcon.Group>
-								{NBSP}ETH
+								{NBSP}{branch.symbol}
 							</div>,
 							<div
 								className={css({

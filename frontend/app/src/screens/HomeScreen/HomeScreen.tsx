@@ -112,7 +112,7 @@ function BorrowTable({
 	return (
 		<div className={css({ gridArea: "borrow" })}>
 			<HomeTable
-				title={`Borrow ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} against ETH and assets`}
+				title={`Borrow ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} against wxDAI and assets`}
 				subtitle="You can adjust your loans, including your interest rate, at any time"
 				icon={<IconBorrow />}
 				columns={columns}
