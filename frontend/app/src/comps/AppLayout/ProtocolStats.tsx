@@ -94,7 +94,7 @@ export function ProtocolStats() {
 						})}
 					/>
 					<LinkTextButton
-						href='https://x.com/neriteorg'
+						href='https://x.com'
 						external
 						label={<IconX size={16} />}
 						className={css({
@@ -111,7 +111,7 @@ export function ProtocolStats() {
 						})}
 					/>
 					<LinkTextButton
-						href='https://docs.nerite.org/'
+						href='https://docs.evro.finance'
 						external
 						label={
 							<HFlex gap={2}>

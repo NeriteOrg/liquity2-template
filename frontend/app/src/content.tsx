@@ -214,7 +214,7 @@ export default {
 		},
 		earnTable: {
 			title: `Earn rewards with ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol}`,
-			subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} & (staked) ETH rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
+			subtitle: `Earn ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} & other asset rewards by depositing your ${WHITE_LABEL_CONFIG.tokens.mainToken.symbol} in a stability pool`,
 		},
 		yieldTable: {
 			title: "Top 3 external yield opportunities",
