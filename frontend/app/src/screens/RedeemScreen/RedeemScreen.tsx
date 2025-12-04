@@ -177,10 +177,10 @@ export function RedeemScreen() {
 													the current fee.
 												</>
 											),
-											footerLink: {
-												href: "https://dune.com/queries/4641717/7730245",
-												label: "Redemption fee on Dune",
-											},
+											// footerLink: {
+											// 	href: "https://dune.com/queries/4641717/7730245",
+											// 	label: "Redemption fee on Dune",
+											// },
 										}}
 									/>
 								</span>

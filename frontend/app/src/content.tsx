@@ -220,7 +220,7 @@ export default {
 			title: "Top 3 external yield opportunities",
 			hint: {
 				title: "All yield sources on Dune",
-				url: "https://dune.com/liquity/liquity-v2-yields",
+				url: "https://dune.com/evrofinance/evrofinance-yields",
 				label: "Learn more",
 			},
 		},
