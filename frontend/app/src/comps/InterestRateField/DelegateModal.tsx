@@ -9,10 +9,10 @@ import { useState } from "react";
 import { DelegateBox } from "./DelegateBox";
 
 const URL_WHAT_IS_DELEGATION =
-  "https://docs.liquity.org/v2-faq/redemptions-and-delegation#what-is-delegation-of-interest-rates";
+  "https://docs.evro.finance/v2-faq/redemptions-and-delegation#what-is-delegation-of-interest-rates";
 
 const DELEGATES_LIST_URL =
-  "https://docs.liquity.org/v2-faq/redemptions-and-delegation#docs-internal-guid-441d8c3f-7fff-4efa-6319-4ba00d908597";
+  "https://docs.evro.finance/v2-faq/redemptions-and-delegation#docs-internal-guid-441d8c3f-7fff-4efa-6319-4ba00d908597";
 
 export function DelegateModal({
   branchId,
