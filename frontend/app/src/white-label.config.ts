@@ -220,7 +220,7 @@ export const WHITE_LABEL_CONFIG = {
     links: {
       docs: {
         base: "https://docs.evro.finance/",
-        redemptions: "https://docs.evrofinance.com/redemptions",
+        redemptions: "https://docs.evro.finance/redemptions",
         liquidations: "https://docs.evro.finance/liquidations",
         delegation: "https://docs.evro.finance/delegation",
         interestRates: "https://docs.evro.finance/interest-rates",

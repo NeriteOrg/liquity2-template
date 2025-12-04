@@ -77,7 +77,7 @@ export function ProtocolStats() {
 						<Price key={symbol} symbol={symbol} />
 					))}
 					<LinkTextButton
-						href='https://discord.gg/5h3avBYxcn'
+						href='https://discord.gg/evrofinance'
 						external
 						label={<IconDiscord size={16} />}
 						className={css({

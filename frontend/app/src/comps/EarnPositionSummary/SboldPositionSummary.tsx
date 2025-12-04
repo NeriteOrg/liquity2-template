@@ -68,10 +68,10 @@ export function SboldPositionSummary({
               content={{
                 heading: "Current APR",
                 body: <>The annualized rate {WHITE_LABEL_CONFIG.tokens.otherTokens.staked.symbol} deposits earned over the last 24 hours.</>,
-                footerLink: {
-                  label: "Check Dune for more details",
-                  href: "https://dune.com/liquity/liquity-v2",
-                },
+                // footerLink: {
+                //   label: "Check Dune for more details",
+                //   href: "https://dune.com/liquity/liquity-v2",
+                // },
               }}
             />
           </div>
@@ -100,10 +100,10 @@ export function SboldPositionSummary({
               content={{
                 heading: "APR (last 7 days)",
                 body: <>The annualized rate {WHITE_LABEL_CONFIG.tokens.otherTokens.staked.symbol} deposits earned over the last 7 days.</>,
-                footerLink: {
-                  label: "Check Dune for more details",
-                  href: "https://dune.com/liquity/liquity-v2",
-                },
+                // footerLink: {
+                //   label: "Check Dune for more details",
+                //   href: "https://dune.com/liquity/liquity-v2",
+                // },
               }}
             />
           </div>

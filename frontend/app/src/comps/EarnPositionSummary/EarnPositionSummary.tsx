@@ -93,10 +93,10 @@ export function EarnPositionSummary({
                 heading: "Current APR",
                 body: "The annualized rate this stability pool’s "
                   + "deposits earned over the last 24 hours.",
-                footerLink: {
-                  label: "Check Dune for more details",
-                  href: "https://dune.com/liquity/liquity-v2",
-                },
+                // footerLink: {
+                //   label: "Check Dune for more details",
+                //   href: "https://dune.com/liquity/liquity-v2",
+                // },
               }}
             />
           </div>
@@ -126,10 +126,10 @@ export function EarnPositionSummary({
                 heading: "APR (last 7 days)",
                 body: "The annualized percentage rate this stability pool’s "
                   + "deposits earned over the past 7 days.",
-                footerLink: {
-                  label: "Check Dune for more details",
-                  href: "https://dune.com/liquity/liquity-v2",
-                },
+                // footerLink: {
+                //   label: "Check Dune for more details",
+                //   href: "https://dune.com/liquity/liquity-v2",
+                // },
               }}
             />
           </div>
