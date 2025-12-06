@@ -51,6 +51,18 @@ uint256 constant LIQUIDATION_PENALTY_SP_SETH = 5 * _1pct;
 uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_WETH = 10 * _1pct;
 uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_SETH = 20 * _1pct;
 
+uint256 constant LIQUIDATION_PENALTY_SP_GNO = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_GNO = 10 * _1pct;
+
+uint256 constant LIQUIDATION_PENALTY_SP_SDAI = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_SDAI = 10 * _1pct;
+
+uint256 constant LIQUIDATION_PENALTY_SP_WBTC = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_WBTC = 10 * _1pct;
+
+uint256 constant LIQUIDATION_PENALTY_SP_OSGNO = 5 * _1pct;
+uint256 constant LIQUIDATION_PENALTY_REDISTRIBUTION_OSGNO = 10 * _1pct;
+
 // Fraction of collateral awarded to liquidator
 uint256 constant COLL_GAS_COMPENSATION_DIVISOR = 200; // dividing by 200 yields 0.5%
 uint256 constant COLL_GAS_COMPENSATION_CAP = 10 ether; // Max coll gas compensation capped at 10 xDAI
