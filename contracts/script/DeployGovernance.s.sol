@@ -44,9 +44,9 @@ contract DeployGovernance is Script {
         uint256 epochStart;
         address deployer;
         bytes32 salt;
-        address stakingV1;
-        address lqty;
-        address lusd;
+        // address stakingV1;
+        // address lqty;
+        // address lusd;
         address bold;
     }
 
@@ -89,46 +89,46 @@ contract DeployGovernance is Script {
         address _curveUsdcBoldPoolAddress,
         address _curveLusdBoldPoolAddress
     ) internal returns (address, string memory) {
-        (address governanceAddress, IGovernance.Configuration memory governanceConfiguration) =
-            computeGovernanceAddressAndConfig(p);
+        // (address governanceAddress, IGovernance.Configuration memory governanceConfiguration) =
+        //     computeGovernanceAddressAndConfig(p);
 
-        governance = new Governance{salt: p.salt}(
-            p.lqty, p.lusd, p.stakingV1, p.bold, governanceConfiguration, p.deployer, initialInitiatives
-        );
+        // governance = new Governance{salt: p.salt}(
+        //     p.lqty, p.lusd, p.stakingV1, p.bold, governanceConfiguration, p.deployer, initialInitiatives
+        // );
 
-        assert(governanceAddress == address(governance));
+        // assert(governanceAddress == address(governance));
 
-        curveUsdcBoldPool = ICurveStableSwapNG(_curveUsdcBoldPoolAddress);
-        curveLusdBoldPool = ICurveStableSwapNG(_curveLusdBoldPoolAddress);
+        // curveUsdcBoldPool = ICurveStableSwapNG(_curveUsdcBoldPoolAddress);
+        // curveLusdBoldPool = ICurveStableSwapNG(_curveLusdBoldPoolAddress);
 
-        if (block.chainid == 1) {
-            // mainnet
-            (curveUsdcBoldGauge, curveUsdcBoldInitiative) = deployCurveV2GaugeRewards({
-                _governance: governance,
-                _bold: p.bold,
-                _curveFactoryAddress: _curveFactoryAddress,
-                _curvePool: curveUsdcBoldPool
-            });
+        // if (block.chainid == 1) {
+        //     // mainnet
+        //     (curveUsdcBoldGauge, curveUsdcBoldInitiative) = deployCurveV2GaugeRewards({
+        //         _governance: governance,
+        //         _bold: p.bold,
+        //         _curveFactoryAddress: _curveFactoryAddress,
+        //         _curvePool: curveUsdcBoldPool
+        //     });
 
-            (curveLusdBoldGauge, curveLusdBoldInitiative) = deployCurveV2GaugeRewards({
-                _governance: governance,
-                _bold: p.bold,
-                _curveFactoryAddress: _curveFactoryAddress,
-                _curvePool: curveLusdBoldPool
-            });
+        //     (curveLusdBoldGauge, curveLusdBoldInitiative) = deployCurveV2GaugeRewards({
+        //         _governance: governance,
+        //         _bold: p.bold,
+        //         _curveFactoryAddress: _curveFactoryAddress,
+        //         _curvePool: curveLusdBoldPool
+        //     });
 
-            initialInitiatives.push(address(curveUsdcBoldInitiative));
-            initialInitiatives.push(address(curveLusdBoldInitiative));
-            initialInitiatives.push(defiCollectiveInitiative = DEFI_COLLECTIVE_GRANTS_ADDRESS);
-        } else {
-            initialInitiatives.push(makeAddr("initiative1"));
-            initialInitiatives.push(makeAddr("initiative2"));
-            initialInitiatives.push(makeAddr("initiative3"));
-        }
+        //     initialInitiatives.push(address(curveUsdcBoldInitiative));
+        //     initialInitiatives.push(address(curveLusdBoldInitiative));
+        //     initialInitiatives.push(defiCollectiveInitiative = DEFI_COLLECTIVE_GRANTS_ADDRESS);
+        // } else {
+        //     initialInitiatives.push(makeAddr("initiative1"));
+        //     initialInitiatives.push(makeAddr("initiative2"));
+        //     initialInitiatives.push(makeAddr("initiative3"));
+        // }
 
-        governance.registerInitialInitiatives{gas: 600000}(initialInitiatives);
+        // governance.registerInitialInitiatives{gas: 600000}(initialInitiatives);
 
-        return (governanceAddress, _getGovernanceManifestJson(p));
+        // return (governanceAddress, _getGovernanceManifestJson(p));
     }
 
     function computeGovernanceAddress(DeployGovernanceParams memory p) internal pure returns (address) {
@@ -141,26 +141,26 @@ contract DeployGovernance is Script {
         pure
         returns (address, IGovernance.Configuration memory)
     {
-        IGovernance.Configuration memory governanceConfiguration = IGovernance.Configuration({
-            registrationFee: REGISTRATION_FEE,
-            registrationThresholdFactor: REGISTRATION_THRESHOLD_FACTOR,
-            unregistrationThresholdFactor: UNREGISTRATION_THRESHOLD_FACTOR,
-            unregistrationAfterEpochs: UNREGISTRATION_AFTER_EPOCHS,
-            votingThresholdFactor: VOTING_THRESHOLD_FACTOR,
-            minClaim: MIN_CLAIM,
-            minAccrual: MIN_ACCRUAL,
-            epochStart: p.epochStart,
-            epochDuration: EPOCH_DURATION,
-            epochVotingCutoff: EPOCH_VOTING_CUTOFF
-        });
+        // IGovernance.Configuration memory governanceConfiguration = IGovernance.Configuration({
+        //     registrationFee: REGISTRATION_FEE,
+        //     registrationThresholdFactor: REGISTRATION_THRESHOLD_FACTOR,
+        //     unregistrationThresholdFactor: UNREGISTRATION_THRESHOLD_FACTOR,
+        //     unregistrationAfterEpochs: UNREGISTRATION_AFTER_EPOCHS,
+        //     votingThresholdFactor: VOTING_THRESHOLD_FACTOR,
+        //     minClaim: MIN_CLAIM,
+        //     minAccrual: MIN_ACCRUAL,
+        //     epochStart: p.epochStart,
+        //     epochDuration: EPOCH_DURATION,
+        //     epochVotingCutoff: EPOCH_VOTING_CUTOFF
+        // });
 
-        bytes memory bytecode = abi.encodePacked(
-            type(Governance).creationCode,
-            abi.encode(p.lqty, p.lusd, p.stakingV1, p.bold, governanceConfiguration, p.deployer, new address[](0))
-        );
+        // bytes memory bytecode = abi.encodePacked(
+        //     type(Governance).creationCode,
+        //     abi.encode(p.lqty, p.lusd, p.stakingV1, p.bold, governanceConfiguration, p.deployer, new address[](0))
+        // );
 
-        address governanceAddress = vm.computeCreate2Address(p.salt, keccak256(bytecode));
-        return (governanceAddress, governanceConfiguration);
+        // address governanceAddress = vm.computeCreate2Address(p.salt, keccak256(bytecode));
+        // return (governanceAddress, governanceConfiguration);
     }
 
     function deployCurveV2GaugeRewards(
@@ -220,9 +220,9 @@ contract DeployGovernance is Script {
             ),
             string.concat(
                 string.concat('"defiCollectiveInitiative":"', defiCollectiveInitiative.toHexString(), '",'),
-                string.concat('"stakingV1":"', p.stakingV1.toHexString(), '",'),
-                string.concat('"LQTYToken":"', p.lqty.toHexString(), '",'),
-                string.concat('"LUSDToken":"', p.lusd.toHexString(), '",'),
+                // string.concat('"stakingV1":"', p.stakingV1.toHexString(), '",'),
+                // string.concat('"LQTYToken":"', p.lqty.toHexString(), '",'),
+                // string.concat('"LUSDToken":"', p.lusd.toHexString(), '",'),
                 string.concat('"initialInitiatives":', initialInitiatives.toJSON()) // no comma
             ),
             "}"
