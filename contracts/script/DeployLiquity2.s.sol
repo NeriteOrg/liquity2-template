@@ -5,6 +5,8 @@ import {StdCheats} from "forge-std/StdCheats.sol";
 import {IERC20Metadata} from "openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {Strings} from "openzeppelin-contracts/contracts/utils/Strings.sol";
 import {IERC20 as IERC20_GOV} from "openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {ICurveStableswapNGPool} from "src/Zappers/Modules/Exchanges/Curve/ICurveStableswapNGPool.sol";
+import {CurveNGExchange} from "src/Zappers/Modules/Exchanges/CurveNGExchange.sol";
 
 import {StringFormatting} from "test/Utils/StringFormatting.sol";
 import {Accounts} from "test/TestContracts/Accounts.sol";
@@ -149,6 +151,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
+
+    address gov_multisig_address = 0x0000000000000000000000000000000000000000;
 
     address governor;
 
@@ -423,15 +427,15 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // collNames[1] = "Rocket Pool ETH";
         // collSymbols[1] = "rETH";
 
-        // DeployGovernanceParams memory deployGovernanceParams = DeployGovernanceParams({
-        //     epochStart: epochStart,
-        //     deployer: deployer,
-        //     salt: SALT,
-        //     stakingV1: stakingV1,
-        //     lqty: lqty,
-        //     lusd: lusd,
-        //     bold: boldAddress
-        // });
+        DeployGovernanceParams memory deployGovernanceParams = DeployGovernanceParams({
+            epochStart: epochStart,
+            deployer: deployer,
+            salt: SALT,
+            // stakingV1: stakingV1,
+            // lqty: lqty,
+            // lusd: lusd,
+            bold: boldAddress
+        });
 
         // WETH / WXDAI
         troveManagerParamsArray[0] = TroveManagerParams({
@@ -513,13 +517,13 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     (uint256 price,) = deployed.contractsArray[0].priceFeed.fetchPrice();
                     uint256 token1Amount = 1_000_000 ether;
                     _provideUniV3Liquidity(
-                        ERC20Faucet(address(USDC)), ERC20Faucet(address(WETH)), token1Amount, price, UNIV3_FEE_USDC_WETH
+                        ERC20Faucet(address(USDC)), ERC20Faucet(address(WXDAI)), token1Amount, price, UNIV3_FEE_USDC_WETH
                     );
                 } else {
                     // LSTs, we do WETH-LST
                     uint256 token1Amount = 1_000 ether;
                     _provideUniV3Liquidity(
-                        ERC20Faucet(address(WETH)),
+                        ERC20Faucet(address(WXDAI)),
                         ERC20Faucet(address(deployed.contractsArray[i].collToken)),
                         token1Amount,
                         1 ether,
@@ -718,8 +722,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         // Collaterals
         if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
-            // ETH
-            vars.collaterals[0] = IERC20Metadata(WETH);
+            // WXDAI
+            vars.collaterals[0] = IERC20Metadata(WXDAI);
 
             // // wstETH
             // vars.collaterals[1] = IERC20Metadata(WSTETH_ADDRESS);
@@ -743,7 +747,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         } else {
             // Sepolia
             // Use WETH as collateral for the first branch
-            vars.collaterals[0] = WETH;
+            vars.collaterals[0] = WXDAI;
 
             // Deploy plain ERC20Faucets for the rest of the branches
             for (vars.i = 1; vars.i < vars.numCollaterals; vars.i++) {
@@ -789,7 +793,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 address(vars.troveManagers[vars.i]),
                 r.hintHelpers,
                 r.multiTroveGetter,
-                computeGovernanceAddress(_deployGovernanceParams)
+                //computeGovernanceAddress(_deployGovernanceParams)//
+                gov_multisig_address
             );
             r.contractsArray[vars.i] = vars.contracts;
         }
@@ -900,7 +905,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             multiTroveGetter: _multiTroveGetter,
             collateralRegistry: _collateralRegistry,
             boldToken: _boldToken,
-            WETH: WETH
+            WETH: WXDAI
         });
         contracts.addressesRegistry.setAddresses(addressVars);
 
@@ -962,21 +967,11 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     {
         if (block.chainid == 100 && !useTestnetPriceFeeds) {
             // mainnet
-            // ETH
-            if (_collTokenAddress == address(WETH)) {
-                return new WETHPriceFeed(GNO_ETH_USD_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, ETH_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
+            // WXDAI
+            if (_collTokenAddress == address(WXDAI)) {
+                // WETH is the same interface as WXDAI so we use the weth price feed but substituting the WXDAI oracle for the ETH oracle to get wxdai feed
+                return new WETHPriceFeed(GNO_DAI_USD_ORACLE_ADDRESS, GNO_EUR_USD_ORACLE_ADDRESS, GNO_DAI_USD_STALENESS_THRESHOLD, GNO_EUR_USD_STALENESS_THRESHOLD, _borroweOperationsAddress);
             } 
-            // RETH
-            // if(_collTokenAddress == RETH_ADDRESS){
-            // return new RETHPriceFeed(
-            //     GNO_ETH_USD_ORACLE_ADDRESS,
-            //     RETH_ORACLE_ADDRESS,
-            //     RETH_ADDRESS,
-            //     ETH_USD_STALENESS_THRESHOLD,
-            //     RETH_ETH_STALENESS_THRESHOLD,
-            //     _borroweOperationsAddress
-            // );
-            // }
             if(_collTokenAddress == GNO_GNO_ADDRESS){
                 return new GNOPriceFeed(
                     GNO_GNO_USD_ORACLE_ADDRESS,
@@ -1034,20 +1029,15 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     ) internal returns (Zappers memory zappers) {
         IFlashLoanProvider flashLoanProvider = new BalancerFlashLoan();
 
-        IExchange hybridExchange = new HybridCurveUniV3Exchange(
-            _collToken,
-            _boldToken,
+        IExchange hybridExchange = new CurveNGExchange(
             USDC,
-            WETH,
+            _boldToken,
             _usdcCurvePool,
-            OTHER_TOKEN_INDEX, // USDC Curve pool index
-            BOLD_TOKEN_INDEX, // BOLD Curve pool index
-            UNIV3_FEE_USDC_WETH,
-            UNIV3_FEE_WETH_COLL,
-            uniV3Router
+            int128(OTHER_TOKEN_INDEX), // USDC Curve pool index
+            int128(BOLD_TOKEN_INDEX) // BOLD Curve pool index
         );
 
-        bool lst = _collToken != WETH;
+        bool lst = _collToken != WXDAI;
         if (lst) {
             // Detect ERC20Wrapper-style collateral (WBTC wrapper)
             (bool ok, bytes memory ret) = address(_collToken).staticcall(
@@ -1175,13 +1165,13 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         uint256 collAmount = _boldAmount * 2 ether / _price; // CR of ~200%
 
         ERC20Faucet(address(_contracts.collToken)).mint(deployer, collAmount);
-        WETHTester(payable(address(WETH))).mint(deployer, ETH_GAS_COMPENSATION);
+        WETHTester(payable(address(WXDAI))).mint(deployer, ETH_GAS_COMPENSATION);
 
-        if (_contracts.collToken == WETH) {
-            WETH.approve(address(_contracts.borrowerOperations), collAmount + ETH_GAS_COMPENSATION);
+        if (_contracts.collToken == WXDAI) {
+            WXDAI.approve(address(_contracts.borrowerOperations), collAmount + ETH_GAS_COMPENSATION);
         } else {
             _contracts.collToken.approve(address(_contracts.borrowerOperations), collAmount);
-            WETH.approve(address(_contracts.borrowerOperations), ETH_GAS_COMPENSATION);
+            WXDAI.approve(address(_contracts.borrowerOperations), ETH_GAS_COMPENSATION);
         }
 
         _contracts.borrowerOperations.openTrove({
