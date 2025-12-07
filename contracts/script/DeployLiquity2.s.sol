@@ -117,7 +117,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     // address internal lusd;
 
     // GNOSIS
-    address GNO_WXDAI_ADDRESS = 0xBA12222222228d8Ba445958a75a0704d566BF2C8;
+    address GNO_WXDAI_ADDRESS = 0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d;
     address GNO_OSGNO_ADDRESS = 0xF490c80aAE5f2616d3e3BDa2483E30C4CB21d1A0;
     address GNO_SDAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
     address GNO_WBTC_ADDRESS = 0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252;
@@ -194,7 +194,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     INonfungiblePositionManager constant uniV3PositionManagerMainnet =
         INonfungiblePositionManager(0xC36442b4a4522E871399CD717aBDD847Ab11FE88);
 
-    // Balancer
+    // Balancer v3
     IVault constant balancerVault = IVault(0xbA1333333333a1BA1108E8412f11850A5C319bA9); //IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
     IWeightedPoolFactory balancerFactory;
     // Sepolia
