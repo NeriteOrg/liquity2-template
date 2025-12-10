@@ -45,16 +45,24 @@ export async function GET() {
     const json = await res.json();
     const parsed = CoinGeckoSimplePriceSchema.parse(json);
 
+    if (
+      parsed.gnosis?.usd === undefined ||
+      parsed["savings-xdai"]?.usd === undefined ||
+      parsed["wrapped-bitcoin"]?.usd === undefined ||
+      parsed["stakewise-staked-gno-2"]?.usd === undefined
+    ) {
+      throw new Error("Missing required price(s) from CoinGecko response");
+    }
     const prices: PricesResponse["prices"] = {
       EVRO: "1",
       WXDAI: "1",
-      GNO: parsed.gnosis?.usd.toString() ?? "0",
-      SDAI: parsed["savings-xdai"]?.usd.toString() ?? "0",
-      WWBTC: parsed["wrapped-bitcoin"]?.usd.toString() ?? "0",
-      OSGNO: parsed["stakewise-staked-gno-2"]?.usd.toString() ?? "0",
+      GNO: parsed.gnosis.usd.toString(),
+      SDAI: parsed["savings-xdai"].usd.toString(),
+      WWBTC: parsed["wrapped-bitcoin"].usd.toString(),
+      OSGNO: parsed["stakewise-staked-gno-2"].usd.toString(),
     };
 
-    const body: PricesResponse = PricesSchema.parse({ prices });
+    const body: PricesResponse = { prices };
 
     return NextResponse.json(body, {
       headers: {
@@ -64,8 +72,26 @@ export async function GET() {
   } catch (error) {
     console.error("[/api/prices] CoinGecko fetch failed:", error);
 
+    let errorType = "unknown";
+    let errorMessage = "Failed to fetch prices";
+    if (error instanceof z.ZodError) {
+      errorType = "validation_error";
+      errorMessage = error.message;
+    } else if (error instanceof Error) {
+      if (error.message.startsWith("CoinGecko error:")) {
+        errorType = "coingecko_api_error";
+        errorMessage = error.message;
+      } else {
+        errorType = "network_or_internal_error";
+        errorMessage = error.message;
+      }
+    }
     return NextResponse.json(
-      { error: "Failed to fetch prices" },
+      {
+        error: "Failed to fetch prices",
+        errorType,
+        errorMessage,
+      },
       {
         status: 502,
         headers: {

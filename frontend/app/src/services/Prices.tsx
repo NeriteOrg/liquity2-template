@@ -41,9 +41,12 @@ export function usePrice(symbol: string | null): UseQueryResult<Dnum | null> {
         return null;
       }
 
-      const statsPrices = await fetch("/api/prices")
-        .then((res) => res.json())
-        .then((data) => data.prices as Record<string, string>);
+      const response = await fetch("/api/prices");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch prices: ${response.status}`);
+      }
+      const data = await response.json();
+      const statsPrices = data.prices as Record<string, string>;
 
       const priceFromStats = statsPrices?.[symbol] ?? null;
       if (priceFromStats !== null) {
