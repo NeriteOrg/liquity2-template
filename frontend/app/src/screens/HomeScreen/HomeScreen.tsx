@@ -78,7 +78,7 @@ export function HomeScreen() {
       >
         <BorrowTable compact={compact} />
         <EarnTable compact={compact} />
-        <YieldSourceTable compact={compact} />
+        {/* <YieldSourceTable compact={compact} /> */}
       </div>
     </div>
   );
