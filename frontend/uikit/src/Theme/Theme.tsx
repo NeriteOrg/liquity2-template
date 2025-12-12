@@ -97,7 +97,7 @@ export const colors = {
   // White
   "white": "#FFFFFF",
 
-  // Brand colors
+  // Brand colors (Firm)
   "brand:blue": "#405AE5",
   "brand:lightBlue": "#6D8AED",
   "brand:darkBlue": "#121B44",
@@ -106,6 +106,10 @@ export const colors = {
   "brand:cyan": "#95CBF3",
   "brand:coral": "#FB7C59",
   "brand:brown": "#DBB79B",
+  
+  "firm:gold": "#F2B341",
+  "firm:beige": "#EDDBC5",
+  "firm:burgundy": "#7F0A07",
 };
 
 // The light theme with updated colors
@@ -116,7 +120,7 @@ export const lightTheme = {
     accentActive: "blue:600",
     accentContent: "white",
     accentHint: "blue:400",
-    background: "white",
+    background: "firm:beige",
     backgroundActive: "gray:50",
     border: "gray:200",
     borderSoft: "gray:100",

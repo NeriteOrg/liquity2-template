@@ -174,7 +174,7 @@ function EarnTable({
           rows={getAvailableEarnPools()
             .filter(pool => pool.type !== 'staked')
             .map((pool) => {
-              const symbol = pool.symbol.toUpperCase();
+              const symbol = pool.symbol;
               
               return (
                 <EarnRewardsRow
