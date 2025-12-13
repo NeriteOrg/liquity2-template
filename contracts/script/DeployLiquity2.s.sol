@@ -129,7 +129,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
 
 
-    address gov_multisig_address = 0x0000000000000000000000000000000000000000;
+    address gov_multisig_address;
 
     address governor;
 
@@ -295,6 +295,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             governor = vm.envAddress("GOVERNOR");
         } else {
             governor = deployer;    
+        }
+
+        if(vm.envBytes("GOVERNANCE").length == 20) {
+            gov_multisig_address = vm.envAddress("GOVERNANCE");
+        } else {
+            gov_multisig_address = msg.sender;
         }
 
         string memory deploymentMode = vm.envOr("DEPLOYMENT_MODE", DEPLOYMENT_MODE_COMPLETE);
@@ -1040,6 +1046,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
             }
         } else {
+            // For WXDAI branch, only deploy WETHZapper (not GasCompZapper)
+            // GasCompZapper requires WETH != collToken, which is not true for WXDAI branch
             zappers.wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
         // leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
