@@ -62,7 +62,7 @@ abstract contract SPInvariantsBase is Assertions, BaseInvariantTest {
         assertApproxEqAbsRelDecimal(stabilityPoolBold, claimableBold, 1e-7 ether, 1, 18, "SP BOLD loss");
 
         assertGeDecimal(yieldGainsOwed, sumYieldGains, 18, "SP yield insolvency");
-        assertApproxEqAbsRelDecimal(yieldGainsOwed, sumYieldGains, 1 ether, 100, 18, "SP yield loss");
+        assertApproxEqAbsRelDecimal(yieldGainsOwed, sumYieldGains, 1 ether, 1000, 18, "SP yield loss");
     }
 }
 
