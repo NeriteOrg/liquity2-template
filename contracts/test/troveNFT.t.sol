@@ -241,6 +241,11 @@ contract troveNFTTest is DevTestSetup {
         // Verify balances updated after NFT transfer
         assertEq(coGNO.balanceOf(B), 0, "CoGNO balance of B should be 0 after NFT transfer");
         assertEq(coGNO.balanceOf(A), 40e18, "CoGNO balance of A should be 40e18 (all 4 troves)");
+        // A closes a trove, then test the balance of the new address.
+        vm.startPrank(A);
+        contractsArray[0].borrowerOperations.closeTrove(troveIds[0]);
+        vm.stopPrank();
+        assertEq(coGNO.balanceOf(A), 30e18, "CoGNO balance of A should be 30e18 (all 3 troves)");
     }
 
     function testTroveURIAttributes() public view {
