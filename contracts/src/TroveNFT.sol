@@ -117,15 +117,12 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
         uint256[] storage troveIds = _ownerToTroveIds[owner];
         uint256 length = troveIds.length;
         // Find the troveId in the array
-        uint256 index = length; // Use length as "not found" marker
-        for (uint256 i = 0; i < length; i++) {
-            if (troveIds[i] == troveId) {
-                index = i;
-                break;
-            }
-        }
+        if (length == 0) return;
+        
+        uint256 index = _troveIdToIndex[troveId];
+        // Validate the index points to the correct troveId
+        if (index >= length || troveIds[index] != troveId) return;
         // If not found, nothing to remove
-        if (index >= length) return;
         uint256 lastIndex = length - 1;
         // Swap with last element and pop (O(1) removal)
         if (index != lastIndex) {

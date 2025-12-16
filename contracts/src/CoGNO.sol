@@ -9,12 +9,11 @@ import "./Types/LatestTroveData.sol";
 
 contract CollateralGNO is ERC20 {
 
-    uint256 public immutable branchID;
     ITroveManager public immutable troveManager;
 
-    constructor(uint256 _branchID, address _troveManagerAddress) ERC20("coGNO", "coGNO") {
-        branchID = _branchID;
-        troveManager =ITroveManager(_troveManagerAddress);
+    constructor(address _troveManagerAddress) ERC20("coGNO", "coGNO") {
+        require(_troveManagerAddress != address(0), "Invalid trove manager address");
+        troveManager = ITroveManager(_troveManagerAddress);
     }
 
     //override balance of to get the current collateral of the users GNO safes.
@@ -36,12 +35,23 @@ contract CollateralGNO is ERC20 {
         return totalCollateral;
     }
 
-    function transfer(address to, uint256 amount) public override returns (bool) {
+    ///////////////// ERC 20 Override functions /////////////////
+   // returns the total collateral balance of the entire gno branch
+   function totalSupply() public view override returns (uint256) {
+        return troveManager.getEntireBranchColl();
+    }
+
+    function transfer(address /*to*/, uint256 /*amount*/) public override returns (bool) {
         revert("Token is non-transferable");
     }
 
-    function transferFrom(address from, address to, uint256 amount) public override returns (bool) {
+    function transferFrom(address /*from*/, address /*to*/, uint256 /*amount*/) public override returns (bool) {
         revert("Token is non-transferable");
     }
+ 
+    function approve(address /*spender*/, uint256 /*amount*/) public override returns (bool) {
+        revert("Token is non-transferable");
+    }
+    
 
 }

@@ -62,6 +62,10 @@ abstract contract SPInvariantsBase is Assertions, BaseInvariantTest {
         assertApproxEqAbsRelDecimal(stabilityPoolBold, claimableBold, 1e-7 ether, 1, 18, "SP BOLD loss");
 
         assertGeDecimal(yieldGainsOwed, sumYieldGains, 18, "SP yield insolvency");
+        // Yield gains require 1000x more relative tolerance than coll/BOLD because:
+        // 1. Yield distribution uses two-layer division (P*yield/totalDeposits, then deposit*gains/P)
+        // 2. Yield updates happen on every SP interaction, compounding rounding errors
+        // 3. The critical invariant (yieldGainsOwed >= sumYieldGains) is checked above
         assertApproxEqAbsRelDecimal(yieldGainsOwed, sumYieldGains, 1 ether, 1000, 18, "SP yield loss");
     }
 }
