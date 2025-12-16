@@ -222,7 +222,7 @@ contract troveNFTTest is DevTestSetup {
         assertEq(bTroves[0], troveIds[0], "B should own troveIds[0]");
 
         //deploy CoGNO contract and test the balance of the new address.
-        CollateralGNO coGNO = new CollateralGNO(0, address(contractsArray[0].troveManager));
+        CollateralGNO coGNO = new CollateralGNO(address(contractsArray[0].troveManager));
         assertEq(coGNO.balanceOf(B), 10e18, "CoGNO balance of B should be 10e18");
         assertEq(coGNO.balanceOf(A), 30e18, "CoGNO balance of A should be 30e18 (troveIds[1] + troveIds[2] + troveIds[3])");
         
