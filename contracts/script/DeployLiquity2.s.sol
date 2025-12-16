@@ -38,6 +38,7 @@ import "test/Utils/StringEquality.sol";
 import "src/Zappers/WETHZapper.sol";
 import "src/Zappers/GasCompZapper.sol";
 import "src/Zappers/WBTCZapper.sol";
+import "src/CoGNO.sol";
 import "src/Zappers/LeverageLSTZapper.sol";
 import "src/Zappers/LeverageWETHZapper.sol";
 import "src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol";
@@ -90,31 +91,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
     uint256 constant NUM_BRANCHES = 5;
 
-    address XDAI_ADDRESS = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     address USDC_ADDRESS = 0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48;
 
     // used for gas compensation and as collateral of the first branch
     // tapping disallowed
     IWETH WXDAI;
     IERC20Metadata USDC;
-    // TODO: UPDATE ALL ADDRESSES FOR GNOSIS denominated in EUR
-    // address WSTETH_ADDRESS = 0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0;
-    // address RETH_ADDRESS = 0xae78736Cd615f374D3085123A210448E74Fc6393;
-    // address ETH_ORACLE_ADDRESS = 0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419;
-    // address RETH_ORACLE_ADDRESS = 0x536218f9E9Eb48863970252233c8F271f554C2d0;
-    // address STETH_ORACLE_ADDRESS = 0xCfE54B5cD566aB89272946F602D76Ea879CAb4a8;
-    // uint256 ETH_USD_STALENESS_THRESHOLD = 25 hours;
-    // uint256 STETH_USD_STALENESS_THRESHOLD = 25 hours;
-    // uint256 RETH_ETH_STALENESS_THRESHOLD = 48 hours;
-
-    // V1
-    // address LQTY_ADDRESS = 0x6DEA81C8171D0bA574754EF6F8b412F2Ed88c54D;
-    // address LQTY_STAKING_ADDRESS = 0x4f9Fbb3f1E99B56e0Fe2892e623Ed36A76Fc605d;
-    // address LUSD_ADDRESS = 0x5f98805A4E8be255a32880FDeC7F6728C6568bA0;
-
-    // address internal lqty;
-    // address internal stakingV1;
-    // address internal lusd;
 
     // GNOSIS
     address GNO_WXDAI_ADDRESS = 0xe91D153E0b41518A2Ce8Dd3D7944Fa863463a97d;
@@ -127,13 +109,6 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
 
     address GNO_WSTETH_ADDRESS = 0x6C76971f98945AE98dD7d4DFcA8711ebea946eA6;
     address GNO_RETH_ADDRESS = 0xc791240D1F2dEf5938E2031364Ff4ed887133C3d;
-
-    address SDAI_ADDRESS = 0xaf204776c7245bF4147c2612BF6e5972Ee483701;
-    address WBTC_ADDRESS = 0x8e5bBbb09Ed1ebdE8674Cda39A0c169401db4252;
-    address OSGNO_ADDRESS = 0xF490c80aAE5f2616d3e3BDa2483E30C4CB21d1A0;
-    address GNO_ADDRESS = 0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb;
-
-    address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
 
     address GNO_OSGNO_GNO_ORACLE_ADDRESS = 0x9B1b13afA6a57e54C03AD0428a4766C39707D272;// osGNO
     address GNO_GNO_USD_ORACLE_ADDRESS = 0x9145522A13E1D3E2DFcC0B26171Aa7979a969C89; // api3 integrated
@@ -149,10 +124,13 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_DAI_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_BTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
-    uint256 WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
 
-    address gov_multisig_address = 0x0000000000000000000000000000000000000000;
+        // gnosis testnet
+    address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
+
+
+    address gov_multisig_address;
 
     address governor;
 
@@ -234,6 +212,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         GasCompZapper gasCompZapper;
         WBTCZapper wbtcZapper;
         ILeverageZapper leverageZapper;
+        CollateralGNO coGNO;
     }
 
     struct LiquityContractAddresses {
@@ -318,6 +297,12 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             governor = vm.envAddress("GOVERNOR");
         } else {
             governor = deployer;    
+        }
+
+        if(vm.envBytes("GOVERNANCE").length == 20) {
+            gov_multisig_address = vm.envAddress("GOVERNANCE");
+        } else {
+            gov_multisig_address = msg.sender;
         }
 
         string memory deploymentMode = vm.envOr("DEPLOYMENT_MODE", DEPLOYMENT_MODE_COMPLETE);
@@ -732,10 +717,10 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             // vars.collaterals[2] = IERC20Metadata(RETH_ADDRESS);
 
             // GNO
-            vars.collaterals[1] = IERC20Metadata(GNO_ADDRESS);
+            vars.collaterals[1] = IERC20Metadata(GNO_GNO_ADDRESS);
 
             // sDAI
-            vars.collaterals[2] = IERC20Metadata(SDAI_ADDRESS);
+            vars.collaterals[2] = IERC20Metadata(GNO_SDAI_ADDRESS);
 
             // WBTC - deploy wrapper
             WBTCWrapper wbtcWrapper = new WBTCWrapper(GNO_WBTC_ADDRESS);
@@ -743,7 +728,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
             vars.collaterals[3] = IERC20Metadata(r.wbtcWrapper);
 
             // OSGNO
-            vars.collaterals[4] = IERC20Metadata(OSGNO_ADDRESS);
+            vars.collaterals[4] = IERC20Metadata(GNO_OSGNO_ADDRESS);
         } else {
             // Sepolia
             // Use WETH as collateral for the first branch
@@ -943,6 +928,11 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         contracts.wethZapper = zappers.wethZapper;
         contracts.wbtcZapper = zappers.wbtcZapper;
         contracts.leverageZapper = zappers.leverageZapper;
+
+        // Deploy CoGNO token only for GNO branch
+        if (address(_collToken) == GNO_GNO_ADDRESS) {
+            contracts.coGNO = new CollateralGNO{salt: SALT}(address(contracts.troveManager));
+        }
     }
 
     function _isWBTCWrapper(address _token) internal view returns (bool) {
@@ -1063,6 +1053,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 zappers.gasCompZapper = new GasCompZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
             }
         } else {
+            // For WXDAI branch, only deploy WETHZapper (not GasCompZapper)
+            // GasCompZapper requires WETH != collToken, which is not true for WXDAI branch
             zappers.wethZapper = new WETHZapper(_addressesRegistry, flashLoanProvider, hybridExchange);
         }
         // leverageZapper = _deployHybridLeverageZapper(_addressesRegistry, flashLoanProvider, hybridExchange, lst);
@@ -1350,7 +1342,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 string.concat(
                     string.concat('"gasCompZapper":"', address(c.gasCompZapper).toHexString(), '",'),
                     string.concat('"wbtcZapper":"', address(c.wbtcZapper).toHexString(), '",'),
-                    string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '"') // no comma
+                    string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '",'),
+                    string.concat('"coGNO":"', address(c.coGNO).toHexString(), '"') // only non-zero for GNO branch
                 )
             ),
             "}"

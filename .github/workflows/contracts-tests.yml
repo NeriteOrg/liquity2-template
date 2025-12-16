@@ -57,6 +57,7 @@ jobs:
 
   test-e2e:
     name: Foundry "E2E" tests
+    if: false  # Skipped until FORK_URL secret is configured
     runs-on: ubuntu-latest
     env:
       SALT: Liquity2-E2E

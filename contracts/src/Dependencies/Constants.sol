@@ -10,7 +10,7 @@ uint256 constant _100pct = DECIMAL_PRECISION;
 uint256 constant _1pct = DECIMAL_PRECISION / 100;
 
 // Amount of xDAI to be locked in gas pool on opening troves
-uint256 constant ETH_GAS_COMPENSATION = 1 ether;
+uint256 constant ETH_GAS_COMPENSATION = 0.00375 ether;
 
 // Liquidation
 uint256 constant MIN_LIQUIDATION_PENALTY_SP = 5e16; // 5%
@@ -68,7 +68,7 @@ uint256 constant COLL_GAS_COMPENSATION_DIVISOR = 200; // dividing by 200 yields 
 uint256 constant COLL_GAS_COMPENSATION_CAP = 10 ether; // Max coll gas compensation capped at 10 xDAI
 
 // Minimum amount of net Bold debt a trove must have
-uint256 constant MIN_DEBT = 500e18;
+uint256 constant MIN_DEBT = 2000e18;
 
 uint256 constant MIN_ANNUAL_INTEREST_RATE = _1pct / 2; // 0.5%
 uint256 constant MAX_ANNUAL_INTEREST_RATE = 250 * _1pct;
