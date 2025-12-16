@@ -9,6 +9,8 @@ import "./ITroveManager.sol";
 interface ITroveNFT is IERC721Metadata {
     function mint(address _owner, uint256 _troveId) external;
     function burn(uint256 _troveId) external;
+
+    function ownerToTroveIds(address owner) external view returns (uint256[] memory);
 }
 
 interface IExternalNFTUri {
