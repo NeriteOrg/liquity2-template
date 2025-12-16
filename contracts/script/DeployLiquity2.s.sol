@@ -125,6 +125,9 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
     uint256 GNO_BTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_WBTC_USD_STALENESS_THRESHOLD = 25 hours;
     uint256 GNO_ETH_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_WSTETH_USD_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_WSTETH_RATE_PROVIDER_STALENESS_THRESHOLD = 25 hours;
+    uint256 GNO_STETH_USD_STALENESS_THRESHOLD = 25 hours;
 
         // gnosis testnet
     address CHIADO_GNO_ADDRESS = 0x19C653Da7c37c66208fbfbE8908A5051B57b4C70;
@@ -1004,6 +1007,23 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                     _borroweOperationsAddress
                 );
             }
+            if(_collTokenAddress == GNO_WSTETH_ADDRESS){
+                // Using ETH/USD oracle for both ETH and stETH prices (stETH ≈ ETH)
+                return new WSTETHPriceFeed(
+                    GNO_ETH_USD_ORACLE_ADDRESS,  // ETH/USD oracle
+                    GNO_STETH_USD_ORACLE_ADDRESS,  // stETH/USD oracle (using ETH/USD as proxy)
+                    GNO_WSTETH_RATE_PROVIDER_ADDRESS,   // wstETH chainlink data feed for exchange rate
+                    GNO_EUR_USD_ORACLE_ADDRESS,  // EUR/USD oracle for conversion
+                    GNO_ETH_USD_STALENESS_THRESHOLD,
+                    GNO_STETH_USD_STALENESS_THRESHOLD,
+                    GNO_EUR_USD_STALENESS_THRESHOLD,
+                    GNO_WSTETH_RATE_PROVIDER_STALENESS_THRESHOLD,
+                    GNO_WSTETH_RATE_PROVIDER_ADDRESS,
+                    _borroweOperationsAddress
+                );
+            }
+           
+
         }
 
         // Sepolia

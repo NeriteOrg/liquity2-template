@@ -838,15 +838,32 @@ contract TestDeployer is MetadataDeployment {
                 _oracleParams.rEthEthStalenessThreshold,
                 _borrowerOperationsAddress
             );
+   
         }
 
-        // wstETH
+        // address _ethUsdOracleAddress,
+        // address _stEthUsdOracleAddress,
+        // address _wstEthTokenAddress,
+        // address _eurUsdOracleAddress,
+        // uint256 _ethUsdStalenessThreshold,
+        // uint256 _stEthUsdStalenessThreshold,
+        // uint256 _eurUsdStalenessThreshold,
+        // uint256 _rateProviderStalenessThreshold,
+        // address _rateProviderOracleAddress,
+        // address _borrowerOperationsAddress
+
+        // wstETH 
+        // adding 0 address to extra params and 24 hours to staleness threshold
         return new WSTETHPriceFeed(
             _externalAddresses.ETHOracle,
             _externalAddresses.STETHOracle,
             _externalAddresses.WSTETHToken,
-            _oracleParams.ethUsdStalenessThreshold,
-            _oracleParams.stEthUsdStalenessThreshold,
+            address(0),
+            24 hours,
+            24 hours,
+            24 hours,
+            24 hours,
+            address(0),
             _borrowerOperationsAddress
         );
     }
