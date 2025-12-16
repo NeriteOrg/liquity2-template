@@ -84,27 +84,25 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
         return _ownerToTroveIds[owner];
     }
 
-    function _beforeTokenTransfer(address from, address to, uint256 firstTokenId)
+    function _beforeTokenTransfer(address from, address to, uint256 tokenId)
         internal
         virtual
 
     {
         // Only handle single token transfers
-        uint256 troveId = firstTokenId;
-
         if (from == address(0)) {
             // Minting: add to new owner's list
-            _ownerToTroveIds[to].push(troveId);
-            _troveIdToIndex[troveId] = _ownerToTroveIds[to].length - 1;
+            _ownerToTroveIds[to].push(tokenId);
+            _troveIdToIndex[tokenId] = _ownerToTroveIds[to].length - 1;
         } else if (to == address(0)) {
             // Burning: remove from owner's list
-            _removeTroveFromOwner(from, troveId);
-            delete _troveIdToIndex[troveId];
+            _removeTroveFromOwner(from, tokenId);
+            delete _troveIdToIndex[tokenId];
         } else {
             // Transferring: remove from old owner, add to new owner
-            _removeTroveFromOwner(from, troveId);
-            _ownerToTroveIds[to].push(troveId);
-            _troveIdToIndex[troveId] = _ownerToTroveIds[to].length - 1;
+            _removeTroveFromOwner(from, tokenId);
+            _ownerToTroveIds[to].push(tokenId);
+            _troveIdToIndex[tokenId] = _ownerToTroveIds[to].length - 1;
         }
     }
 
