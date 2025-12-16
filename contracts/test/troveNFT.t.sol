@@ -480,4 +480,186 @@ contract troveNFTTest is DevTestSetup {
         result = numUtils.toLocaleString(1, 10, 10);
         assertEq(result, "0.0000000001");
     }
+
+    function testSafeTransferFrom() public {
+        // Test safeTransferFrom works same as transferFrom
+        vm.prank(A);
+        troveNFTWETH.safeTransferFrom(A, B, troveIds[1]);
+        
+        assertEq(troveNFTWETH.ownerOf(troveIds[1]), B, "Trove owner should be B after safeTransferFrom");
+        
+        uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
+        uint256[] memory bTroves = troveNFTWETH.ownerToTroveIds(B);
+        assertEq(aTroves.length, 3, "A should have 3 troves after transfer");
+        assertEq(bTroves.length, 1, "B should have 1 trove after transfer");
+        assertEq(bTroves[0], troveIds[1], "B should own troveIds[1]");
+    }
+
+    function testRemoveMiddleTrove() public {
+        // Close middle trove to test swap-and-pop removal
+        uint256 middleTroveId = troveIds[1];
+        
+        // Verify A has 4 troves initially
+        uint256[] memory aTrovesBefore = troveNFTWETH.ownerToTroveIds(A);
+        assertEq(aTrovesBefore.length, 4, "A should have 4 troves initially");
+        
+        vm.startPrank(A);
+        contractsArray[0].borrowerOperations.closeTrove(middleTroveId);
+        vm.stopPrank();
+        
+        uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
+        assertEq(aTroves.length, 3, "A should have 3 troves after closing one");
+        
+        // Verify the middle trove was removed
+        for (uint256 i = 0; i < aTroves.length; i++) {
+            assertTrue(aTroves[i] != middleTroveId, "Middle trove should be removed");
+        }
+    }
+
+    function testTransferMiddleTrove() public {
+        // Transfer middle trove to test swap-and-pop removal during transfer
+        uint256 middleTroveId = troveIds[1];
+        
+        vm.prank(A);
+        troveNFTWETH.transferFrom(A, B, middleTroveId);
+        
+        uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
+        uint256[] memory bTroves = troveNFTWETH.ownerToTroveIds(B);
+        
+        assertEq(aTroves.length, 3, "A should have 3 troves after transfer");
+        assertEq(bTroves.length, 1, "B should have 1 trove");
+        
+        // Verify the middle trove was removed from A
+        for (uint256 i = 0; i < aTroves.length; i++) {
+            assertTrue(aTroves[i] != middleTroveId, "Middle trove should be removed from A");
+        }
+        assertEq(bTroves[0], middleTroveId, "B should own the middle trove");
+    }
+
+    function testMultipleTransfersRoundTrip() public {
+        // Test A -> B -> C -> A round trip
+        uint256 troveId = troveIds[0];
+        
+        // A -> B
+        vm.prank(A);
+        troveNFTWETH.transferFrom(A, B, troveId);
+        assertEq(troveNFTWETH.ownerOf(troveId), B, "Owner should be B");
+        
+        // B -> C
+        vm.prank(B);
+        troveNFTWETH.transferFrom(B, C, troveId);
+        assertEq(troveNFTWETH.ownerOf(troveId), C, "Owner should be C");
+        
+        // C -> A
+        vm.prank(C);
+        troveNFTWETH.transferFrom(C, A, troveId);
+        assertEq(troveNFTWETH.ownerOf(troveId), A, "Owner should be A again");
+        
+        // Verify final state
+        uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
+        uint256[] memory bTroves = troveNFTWETH.ownerToTroveIds(B);
+        uint256[] memory cTroves = troveNFTWETH.ownerToTroveIds(C);
+        
+        assertEq(aTroves.length, 4, "A should have 4 troves");
+        assertEq(bTroves.length, 0, "B should have 0 troves");
+        assertEq(cTroves.length, 0, "C should have 0 troves");
+    }
+
+    function testGovernorFunctions() public {
+        address newGovernor = address(0x123);
+        address currentGovernor = troveNFTWETH.governor();
+        
+        // Non-governor cannot change governor
+        vm.prank(A);
+        vm.expectRevert("TroveNFT: Caller is not the governor");
+        troveNFTWETH.changeGovernor(newGovernor);
+        
+        // Non-governor cannot update URI
+        vm.prank(A);
+        vm.expectRevert("TroveNFT: Caller is not the governor.");
+        troveNFTWETH.governorUpdateURI(address(0x456));
+        
+        // Governor can change governor
+        vm.prank(currentGovernor);
+        troveNFTWETH.changeGovernor(newGovernor);
+        assertEq(troveNFTWETH.governor(), newGovernor, "Governor should be updated");
+        
+        // Old governor can no longer act
+        vm.prank(currentGovernor);
+        vm.expectRevert("TroveNFT: Caller is not the governor");
+        troveNFTWETH.changeGovernor(currentGovernor);
+        
+        // New governor can update URI
+        vm.prank(newGovernor);
+        troveNFTWETH.governorUpdateURI(address(0x789));
+        assertEq(troveNFTWETH.externalNFTUriAddress(), address(0x789), "External URI should be updated");
+    }
+
+    function testERC721Enumerable() public view {
+        // Test totalSupply
+        uint256 totalSupply = troveNFTWETH.totalSupply();
+        assertEq(totalSupply, 4, "Total supply should be 4");
+        
+        // Test tokenOfOwnerByIndex
+        uint256 firstToken = troveNFTWETH.tokenOfOwnerByIndex(A, 0);
+        assertEq(troveNFTWETH.ownerOf(firstToken), A, "First token should be owned by A");
+        
+        // Test tokenByIndex
+        uint256 globalFirstToken = troveNFTWETH.tokenByIndex(0);
+        assertTrue(troveNFTWETH.ownerOf(globalFirstToken) != address(0), "Token at index 0 should exist");
+        
+        // Verify all tokens are enumerable
+        for (uint256 i = 0; i < totalSupply; i++) {
+            uint256 tokenId = troveNFTWETH.tokenByIndex(i);
+            assertTrue(troveNFTWETH.ownerOf(tokenId) != address(0), "All tokens should have owners");
+        }
+    }
+
+    function testTransferNonExistentToken() public {
+        uint256 nonExistentId = 999999;
+        
+        vm.prank(A);
+        vm.expectRevert();
+        troveNFTWETH.transferFrom(A, B, nonExistentId);
+    }
+
+    function testUnauthorizedTransfer() public {
+        // B tries to transfer A's token without approval
+        vm.prank(B);
+        vm.expectRevert();
+        troveNFTWETH.transferFrom(A, B, troveIds[0]);
+    }
+
+    function testApprovalAndTransfer() public {
+        // A approves B to transfer troveIds[0]
+        vm.prank(A);
+        troveNFTWETH.approve(B, troveIds[0]);
+        
+        // B can now transfer
+        vm.prank(B);
+        troveNFTWETH.transferFrom(A, C, troveIds[0]);
+        
+        assertEq(troveNFTWETH.ownerOf(troveIds[0]), C, "C should own the trove after approved transfer");
+    }
+
+    function testSetApprovalForAll() public {
+        // A approves B as operator for all tokens
+        vm.prank(A);
+        troveNFTWETH.setApprovalForAll(B, true);
+        
+        // B can transfer any of A's tokens
+        vm.prank(B);
+        troveNFTWETH.transferFrom(A, C, troveIds[0]);
+        assertEq(troveNFTWETH.ownerOf(troveIds[0]), C, "C should own troveIds[0]");
+        
+        vm.prank(B);
+        troveNFTWETH.transferFrom(A, C, troveIds[1]);
+        assertEq(troveNFTWETH.ownerOf(troveIds[1]), C, "C should own troveIds[1]");
+        
+        // Verify ownerToTroveIds updated correctly
+        uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
+        uint256[] memory cTroves = troveNFTWETH.ownerToTroveIds(C);
+        assertEq(aTroves.length, 2, "A should have 2 troves");
+        assertEq(cTroves.length, 2, "C should have 2 troves");
+    }
 }

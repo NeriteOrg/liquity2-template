@@ -26,7 +26,7 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
     mapping(uint256 => uint256) internal _troveIdToIndex;
     address public externalNFTUriAddress = address(0);
 
-    address governor;
+    address public governor;
 
     constructor(IAddressesRegistry _addressesRegistry, address _governor)
         ERC721(
