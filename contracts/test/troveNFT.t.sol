@@ -539,22 +539,28 @@ contract troveNFTTest is DevTestSetup {
     function testMultipleTransfersRoundTrip() public {
         // Test A -> B -> C -> A round trip
         uint256 troveId = troveIds[0];
-        
+        CollateralGNO coGNO = new CollateralGNO(address(contractsArray[0].troveManager));
         // A -> B
         vm.prank(A);
         troveNFTWETH.transferFrom(A, B, troveId);
         assertEq(troveNFTWETH.ownerOf(troveId), B, "Owner should be B");
-        
+        // check coGNO balance of A and B
+        assertEq(coGNO.balanceOf(A), 30e18, "CoGNO balance of A should be 30e18 (3 troves)");
+        assertEq(coGNO.balanceOf(B), 10e18, "CoGNO balance of B should be 10e18 (troveIds[0])");
         // B -> C
         vm.prank(B);
         troveNFTWETH.transferFrom(B, C, troveId);
         assertEq(troveNFTWETH.ownerOf(troveId), C, "Owner should be C");
-        
+        // check coGNO balance of B and C
+        assertEq(coGNO.balanceOf(B), 0, "CoGNO balance of B should be 0 (troveIds[0] transferred to C)");
+        assertEq(coGNO.balanceOf(C), 10e18, "CoGNO balance of C should be 10e18 (troveIds[0])");
         // C -> A
         vm.prank(C);
         troveNFTWETH.transferFrom(C, A, troveId);
         assertEq(troveNFTWETH.ownerOf(troveId), A, "Owner should be A again");
-        
+        // check coGNO balance of C and A
+        assertEq(coGNO.balanceOf(C), 0, "CoGNO balance of C should be 0 (troveIds[0] transferred to A)");
+        assertEq(coGNO.balanceOf(A), 40e18, "CoGNO balance of A should be 40e18 (4 troves)");
         // Verify final state
         uint256[] memory aTroves = troveNFTWETH.ownerToTroveIds(A);
         uint256[] memory bTroves = troveNFTWETH.ownerToTroveIds(B);
