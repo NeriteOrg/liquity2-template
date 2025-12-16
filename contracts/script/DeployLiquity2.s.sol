@@ -930,7 +930,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         contracts.leverageZapper = zappers.leverageZapper;
 
         // Deploy CoGNO token only for GNO branch
-        if (_collToken == GNO_GNO_ADDRESS) {
+        if (address(_collToken) == GNO_GNO_ADDRESS) {
             contracts.coGNO = new CollateralGNO{salt: SALT}(address(contracts.troveManager));
         }
     }
