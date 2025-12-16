@@ -38,6 +38,7 @@ import "test/Utils/StringEquality.sol";
 import "src/Zappers/WETHZapper.sol";
 import "src/Zappers/GasCompZapper.sol";
 import "src/Zappers/WBTCZapper.sol";
+import "src/CoGNO.sol";
 import "src/Zappers/LeverageLSTZapper.sol";
 import "src/Zappers/LeverageWETHZapper.sol";
 import "src/Zappers/Modules/Exchanges/HybridCurveUniV3ExchangeHelpers.sol";
@@ -211,6 +212,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         GasCompZapper gasCompZapper;
         WBTCZapper wbtcZapper;
         ILeverageZapper leverageZapper;
+        CollateralGNO coGNO;
     }
 
     struct LiquityContractAddresses {
@@ -926,6 +928,11 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
         contracts.wethZapper = zappers.wethZapper;
         contracts.wbtcZapper = zappers.wbtcZapper;
         contracts.leverageZapper = zappers.leverageZapper;
+
+        // Deploy CoGNO token only for GNO branch
+        if (_collToken == GNO_GNO_ADDRESS) {
+            contracts.coGNO = new CollateralGNO{salt: SALT}(address(contracts.troveManager));
+        }
     }
 
     function _isWBTCWrapper(address _token) internal view returns (bool) {
@@ -1335,7 +1342,8 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 string.concat(
                     string.concat('"gasCompZapper":"', address(c.gasCompZapper).toHexString(), '",'),
                     string.concat('"wbtcZapper":"', address(c.wbtcZapper).toHexString(), '",'),
-                    string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '"') // no comma
+                    string.concat('"leverageZapper":"', address(c.leverageZapper).toHexString(), '",'),
+                    string.concat('"coGNO":"', address(c.coGNO).toHexString(), '"') // only non-zero for GNO branch
                 )
             ),
             "}"
