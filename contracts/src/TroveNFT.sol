@@ -26,7 +26,9 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
     //mapping from troveId to its index in the owner's array (for O(1) removal)
     mapping(uint256 => uint256) internal _troveIdToIndex;
 
-    constructor(IAddressesRegistry _addressesRegistry)
+    address governor;
+
+    constructor(IAddressesRegistry _addressesRegistry, address _governor)
         ERC721(
             string.concat("Liquity V2 - ", _addressesRegistry.collToken().name()),
             string.concat("LV2_", _addressesRegistry.collToken().symbol())
@@ -36,6 +38,7 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
         collToken = _addressesRegistry.collToken();
         metadataNFT = _addressesRegistry.metadataNFT();
         boldToken = _addressesRegistry.boldToken();
+        governor = _governor;
     }
 
     function tokenURI(uint256 _tokenId) public view override(ERC721, IERC721Metadata) returns (string memory) {
