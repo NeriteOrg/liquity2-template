@@ -6,8 +6,7 @@ import type { Dnum } from "dnum";
 
 import { PRICE_REFRESH_INTERVAL } from "@/src/constants";
 import { getBranchContract } from "@/src/contracts";
-import { dnum18, jsonStringifyWithDnum } from "@/src/dnum-utils";
-import { useLiquityStats } from "@/src/liquity-utils";
+import { dnum18, dnumOrNull } from "@/src/dnum-utils";
 import { isCollateralSymbol } from "@liquity2/uikit";
 import { useQuery } from "@tanstack/react-query";
 import { useConfig as useWagmiConfig } from "wagmi";
@@ -34,19 +33,24 @@ async function fetchCollateralPrice(
 }
 
 export function usePrice(symbol: string | null): UseQueryResult<Dnum | null> {
-  const stats = useLiquityStats();
   const config = useWagmiConfig();
-  const statsPrices = stats.data?.prices;
   return useQuery({
-    queryKey: ["usePrice", symbol, jsonStringifyWithDnum(statsPrices)],
+    queryKey: ["usePrice", symbol],
     queryFn: async () => {
       if (symbol === null) {
         return null;
       }
 
+      const response = await fetch("/api/prices");
+      if (!response.ok) {
+        throw new Error(`Failed to fetch prices: ${response.status}`);
+      }
+      const data = await response.json();
+      const statsPrices = data.prices as Record<string, string>;
+
       const priceFromStats = statsPrices?.[symbol] ?? null;
       if (priceFromStats !== null) {
-        return priceFromStats;
+        return dnumOrNull(priceFromStats, 18);
       }
 
       if (isCollateralSymbol(symbol)) {

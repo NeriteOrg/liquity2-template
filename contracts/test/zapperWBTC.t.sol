@@ -182,6 +182,7 @@ contract ZapperWBTCTest is DevTestSetup {
         wbtcZapper.openTroveWithWBTC{value: ETH_GAS_COMPENSATION}(params);
         vm.stopPrank();
     }
+    
     function testCanAddColl() external {
         uint256 wwbtcAmount1 = 10 ether;
         uint256 wbtcAmount1 = wwbtcAmount1 / 1e10;

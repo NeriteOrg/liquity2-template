@@ -12,7 +12,6 @@ import "./Interfaces/IAddressesRegistry.sol";
 import {IMetadataNFT} from "./NFTMetadata/MetadataNFT.sol";
 import {ITroveManager} from "./Interfaces/ITroveManager.sol";
 
-import "forge-std/console.sol";
 
 contract TroveNFT is ERC721Enumerable, ITroveNFT {
     ITroveManager public immutable troveManager;
@@ -25,6 +24,7 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
     mapping(address => uint256[]) internal _ownerToTroveIds;
     //mapping from troveId to its index in the owner's array (for O(1) removal)
     mapping(uint256 => uint256) internal _troveIdToIndex;
+    address public externalNFTUriAddress = address(0);
 
     address governor;
 
@@ -34,6 +34,7 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
             string.concat("LV2_", _addressesRegistry.collToken().symbol())
         )
     {
+        
         troveManager = _addressesRegistry.troveManager();
         collToken = _addressesRegistry.collToken();
         metadataNFT = _addressesRegistry.metadataNFT();
@@ -42,6 +43,12 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
     }
 
     function tokenURI(uint256 _tokenId) public view override(ERC721, IERC721Metadata) returns (string memory) {
+                //governor can update the URI externally at any time 
+        //without effecting the NFT storage or other parts of the protocol.
+        if (externalNFTUriAddress != address(0)) {
+            return IExternalNFTUri(externalNFTUriAddress).tokenURI(_tokenId);
+        }
+
         LatestTroveData memory latestTroveData = troveManager.getLatestTroveData(_tokenId);
 
         IMetadataNFT.TroveData memory troveData = IMetadataNFT.TroveData({
@@ -131,5 +138,15 @@ contract TroveNFT is ERC721Enumerable, ITroveNFT {
 
     function _requireCallerIsTroveManager() internal view {
         require(msg.sender == address(troveManager), "TroveNFT: Caller is not the TroveManager contract");
+    }
+
+    function changeGovernor(address _governor) external {
+        require(msg.sender == governor, "TroveNFT: Caller is not the governor");
+        governor = _governor;
+    }
+
+    function governorUpdateURI(address _externalNFTUriAddress) external {
+        require(msg.sender == governor, "TroveNFT: Caller is not the governor.");
+        externalNFTUriAddress = _externalNFTUriAddress;
     }
 }
