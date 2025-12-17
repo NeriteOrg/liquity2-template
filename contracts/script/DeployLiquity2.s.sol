@@ -1028,7 +1028,7 @@ contract DeployLiquity2Script is DeployGovernance, UniPriceConverter, StdCheats,
                 // Using ETH/USD oracle for both ETH and stETH prices (stETH ≈ ETH)
                 return new WSTETHPriceFeed(
                     GNO_ETH_USD_ORACLE_ADDRESS,  // ETH/USD oracle
-                    GNO_STETH_USD_ORACLE_ADDRESS,  // stETH/USD oracle (using ETH/USD as proxy)
+                    GNO_STETH_USD_ORACLE_ADDRESS,  // stETH/USD oracle
                     GNO_WSTETH_RATE_PROVIDER_ADDRESS,   // wstETH chainlink data feed for exchange rate
                     GNO_EUR_USD_ORACLE_ADDRESS,  // EUR/USD oracle for conversion
                     GNO_ETH_USD_STALENESS_THRESHOLD,

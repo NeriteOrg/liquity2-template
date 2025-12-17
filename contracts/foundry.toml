@@ -40,6 +40,3 @@ broadcast = 'broadcast-e2e'
 no_storage_caching = true
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
-[etherscan]
-#                   Paste TENDERLY_ACCESS_TOKEN            Chain ID         Verifier URL: RPC_URL/verify/etherscan
-gnosis = { key = "mvOFw9R23AD1CPGFVGcWK02xy3MkRo0P", chain = 100, url = "https://api.tenderly.co/api/v1/account/MrDeadCe11/project/project/etherscan/verify/network/100" }
